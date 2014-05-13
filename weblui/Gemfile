@@ -1,0 +1,8 @@
+source 'https://rubygems.org'
+source 'http://gems.a4word.com:4003'
+
+gem 'compass'
+gem 'modular-scale', '1.0.6'
+gem 'sassy-math'
+require 'sassy-math'
+require 'modular-scale'

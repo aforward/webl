@@ -1,0 +1,25 @@
+GEM
+  remote: https://rubygems.org/
+  remote: http://gems.a4word.com:4003/
+  specs:
+    chunky_png (1.3.1)
+    compass (0.12.6)
+      chunky_png (~> 1.2)
+      fssm (>= 0.2.7)
+      sass (~> 3.2.19)
+    fssm (0.2.10)
+    modular-scale (1.0.6)
+      compass (>= 0.12.1)
+      sass (>= 3.2.0)
+      sassy-math (>= 1.5)
+    sass (3.2.19)
+    sassy-math (1.5)
+      compass (~> 0.11)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  compass
+  modular-scale (= 1.0.6)
+  sassy-math

@@ -1,0 +1,34 @@
+
+$button_colour: #215f8b
+$button_hover_colour: #19486a
+$light_colour: #eef1f2
+$dark_colour: #302d28
+$default_font_family: "proxima-nova", sans-serif
+$disabled_colour: red
+
+.homepage
+  background-color: $light_colour
+  margin: 20px 2px 0 2px
+  padding-bottom: 50px
+  font-family: $default_font_family
+  color: $dark_colour
+  h2
+    font-weight: 800
+
+.go-button
+  background-color: $button_colour
+  float: left
+  margin-right: 10px
+  &:hover
+    background-color: $button_hover_colour
+
+.disabled
+  background-color: $disabled_colour
+
+.loader
+  background: $light_colour url('/static/i/loader.gif') no-repeat right top
+  display: none
+  width: 32px
+  height: 32px
+  float: left
+  padding-left: 10px
