@@ -10,7 +10,9 @@ import (
   "github.com/bmizerany/pat"
   "github.com/garyburd/redigo/redis"
   "flag"
-  "github.com/aforward/webl/api"
+  "github.com/aforward/webl"
+  "gopkg.in/fatih/set.v0"
+
 )
 
 //-----------
@@ -48,6 +50,10 @@ func v(name string, r *http.Request) string {
 // VIEWS
 //-----------
 
+type Graph struct {
+  Edges []Edge 
+}
+
 //-----------
 // ROUTES
 //-----------
@@ -57,8 +63,10 @@ func getRoot(w http.ResponseWriter, r *http.Request) {
 }
 
 func getUrl(w http.ResponseWriter, r *http.Request) {
-  domain := webl.LoadDomain(v("url",r),true)
-  webViews["url"].Execute(w, domain)
+  edges := make([]Edge,10)
+  root := webl.LoadDomain(v("url",r),false)
+  edges = flatten(edges,&root,set.New())
+  webViews["url"].Execute(w, Graph{ Edges: edges })
 }
 
 func postUrl(w http.ResponseWriter, r *http.Request) {

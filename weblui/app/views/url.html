@@ -38,9 +38,9 @@
 
     var renderer = new Graph.Renderer.Raphael('canvas', g, w, h);
     var layouter = new Graph.Layout.Spring(g);
-    {{range .Links}}
-      {{if .Url}}
-        g.addEdge("{{$.Name}}", "{{.Name}}");
+    {{range .Edges}}
+      {{if .FromName}}
+        g.addEdge("{{.FromName}}", "{{.ToName}}");
       {{end}}
     {{end}}
      
