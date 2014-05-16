@@ -12,14 +12,17 @@ import (
 
 func Crawl(domainName string) {
   INFO.Println(fmt.Sprintf("About to crawl: %s", domainName))
+
+  httpLimitChannel := initCapacity(4)
   var wg sync.WaitGroup
   wg.Add(1)
+
   alreadyProcessed := set.New()
   url := toUrl(domainName,"")
   name := toFriendlyName(url)
 
   addDomain(&Resource{ Name: name, Url: url })
-  go fetchResource(name,url,alreadyProcessed,&wg)
+  go fetchResource(name, url, alreadyProcessed, httpLimitChannel, &wg)
   TRACE.Println("Wait...")
   wg.Wait();
   TRACE.Println("Done waiting.")
@@ -29,7 +32,7 @@ func Crawl(domainName string) {
   INFO.Println(fmt.Sprintf("Done crawing: %s", domainName))
 }
 
-func fetchResource(domainName string, currentUrl string, alreadyProcessed *set.Set, wg *sync.WaitGroup) {
+func fetchResource(domainName string, currentUrl string, alreadyProcessed *set.Set, httpLimitChannel chan int, wg *sync.WaitGroup) {
   defer wg.Done()
   if alreadyProcessed.Has(currentUrl) {
     TRACE.Println(fmt.Sprintf("Duplicate (skipping): %s", currentUrl))
@@ -37,7 +40,11 @@ func fetchResource(domainName string, currentUrl string, alreadyProcessed *set.S
     saveResource(&Resource{ Name: toFriendlyName(currentUrl), Url: currentUrl })    
     alreadyProcessed.Add(currentUrl)
     TRACE.Println(fmt.Sprintf("Fetch: %s", currentUrl))
+
+    <-httpLimitChannel
     resp, err := http.Get(currentUrl)
+    httpLimitChannel <- 1
+
     should_close_resp := true
 
     if err != nil {
@@ -53,20 +60,26 @@ func fetchResource(domainName string, currentUrl string, alreadyProcessed *set.S
         } else {
           should_close_resp = false
           wg.Add(1);
-          go analyzeResource(domainName, currentUrl, resp, alreadyProcessed, wg)
+          go analyzeResource(domainName, currentUrl, resp, alreadyProcessed, httpLimitChannel, wg)
         }
       }
     }
     if should_close_resp {
-      defer resp.Body.Close()
+      if resp == nil {
+        return
+      }
       defer io.Copy(ioutil.Discard, resp.Body)
+      if resp.Body == nil {
+        return
+      }
+      defer resp.Body.Close()
     }
   } else {
     TRACE.Println(fmt.Sprintf("Skipping: %s", currentUrl))
   }
 }
 
-func analyzeResource(domainName string, currentUrl string, resp *http.Response, alreadyProcessed *set.Set, wg *sync.WaitGroup) {
+func analyzeResource(domainName string, currentUrl string, resp *http.Response, alreadyProcessed *set.Set, httpLimitChannel chan int, wg *sync.WaitGroup) {
   defer wg.Done()
   defer resp.Body.Close()
   defer io.Copy(ioutil.Discard, resp.Body)
@@ -89,7 +102,7 @@ func analyzeResource(domainName string, currentUrl string, resp *http.Response, 
         wg.Add(1)
         nextUrl := toUrl(domainName,path)
         saveEdge(domainName,currentUrl,nextUrl)
-        go fetchResource(domainName,nextUrl,alreadyProcessed,wg)
+        go fetchResource(domainName,nextUrl,alreadyProcessed,httpLimitChannel,wg)
       }
     }
   }

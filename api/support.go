@@ -82,3 +82,13 @@ func resource_path(token html.Token) (string) {
   }
   return ""
 }
+
+func initCapacity(maxOutstanding int) (sem chan int) {
+  sem = make(chan int, maxOutstanding)
+  for i := 0; i < maxOutstanding; i++ {
+    sem <- 1
+  }
+  return
+}
+
+
