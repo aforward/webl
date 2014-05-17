@@ -45,7 +45,7 @@ You can now crawl websites through the UI
 TODO
 ------------
 
-* Hookup weblui to download apps
+* Enable output of weblui when downloading website
 * Present the sitemap (xml) sitemap (html) to the user only showing the links
 * Grab the title from pages to present better meta-data for the html sitemap
 * Present the resources in a table, highlighting issues pages (e.g. 301, 404, 500)
