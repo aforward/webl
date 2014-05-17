@@ -5,6 +5,7 @@ import (
   "io/ioutil"
   "log"
   "os" 
+  "code.google.com/p/go.net/websocket"
 )
 
 var (
@@ -14,15 +15,21 @@ var (
   ERROR   *log.Logger
 )
 
-func InitLogging(isQuiet bool, isVerbose bool, isTimestamped bool) {
+func InitLogging(isQuiet bool, isVerbose bool, isTimestamped bool, ws *websocket.Conn) {
   var traceHandle, infoHandle, warnHandle, errorHandle io.Writer
   var traceFormat, infoFormat, warnFormat, errorFormat int
   var tracePrefix, infoPrefix, warnPrefix, errorPrefix string
 
   traceHandle = ioutil.Discard
-  infoHandle = os.Stdout
-  warnHandle = os.Stdout
-  errorHandle = os.Stderr
+  if ws == nil {
+    infoHandle = os.Stdout
+    warnHandle = os.Stdout
+    errorHandle = os.Stderr
+  } else {
+    infoHandle = ws
+    warnHandle = ws
+    errorHandle = ws
+  }
 
   tracePrefix = "TRACE: "
   warnPrefix = ""
@@ -33,15 +40,19 @@ func InitLogging(isQuiet bool, isVerbose bool, isTimestamped bool) {
     infoHandle = ioutil.Discard
     warnHandle = ioutil.Discard
   } else if isVerbose {
-    infoFormat = log.Ldate|log.Ltime|log.Lshortfile
-    traceHandle = os.Stdout
+    infoFormat = log.Ldate|log.Ltime
+    if ws == nil {
+      traceHandle = os.Stdout
+    } else {
+      traceHandle = ws
+    }
   }
 
   if isTimestamped {
-    traceFormat = log.Ldate|log.Ltime|log.Lshortfile
-    infoFormat = log.Ldate|log.Ltime|log.Lshortfile
-    warnFormat = log.Ldate|log.Ltime|log.Lshortfile
-    errorFormat = log.Ldate|log.Ltime|log.Lshortfile
+    traceFormat = log.Ldate|log.Ltime
+    infoFormat = log.Ldate|log.Ltime
+    warnFormat = log.Ldate|log.Ltime
+    errorFormat = log.Ldate|log.Ltime
     warnPrefix = "WARNING: "
     infoPrefix = "INFO: "
   } else {

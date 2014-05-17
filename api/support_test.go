@@ -8,7 +8,7 @@ import (
 
 // Hook up gocheck into the "go test" runner.
 func Test(t *testing.T) { 
-  InitLogging(false, false, false)
+  InitLogging(false, false, false, nil)
   TestingT(t) 
 }
 

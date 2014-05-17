@@ -2,7 +2,7 @@ package main
 
 import (
   "fmt"
-  "github.com/aforward/webl"
+  "github.com/aforward/webl/api"
   "gopkg.in/fatih/set.v0"
 )
 

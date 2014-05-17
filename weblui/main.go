@@ -10,9 +10,9 @@ import (
   "github.com/bmizerany/pat"
   "github.com/garyburd/redigo/redis"
   "flag"
-  "github.com/aforward/webl"
+  "github.com/aforward/webl/api"
   "gopkg.in/fatih/set.v0"
-
+  "code.google.com/p/go.net/websocket"
 )
 
 //-----------
@@ -77,24 +77,36 @@ func getStatic(w http.ResponseWriter, r *http.Request) {
   http.ServeFile(w, r, r.URL.Path[1:])
 }
 
+func doCrawl(ws *websocket.Conn) {
+  webl.InitLogging(*isQuiet, *isVerbose, *isTimestamped, ws)
+  var url string
+  websocket.Message.Receive(ws, &url)
+  webl.Crawl(url)
+  websocket.Message.Send(ws, "exit")
+}
+
 //-----------
 // WEB SERVER
 //-----------
 
 var (
   pool *redis.Pool
+  isQuiet *bool
+  isVerbose *bool
+  isTimestamped *bool
 )
 
 func main() {
-  isVerbose     := flag.Bool("verbose",          false,   "Turn on as musch debugging information as possible")
-  isQuiet       := flag.Bool("quiet",            false,   "Turn off all but the most important logging")
-  isTimestamped := flag.Bool("timestamped",      false,   "Should outputs be timestamped")
+  isVerbose     = flag.Bool("verbose",          false,   "Turn on as musch debugging information as possible")
+  isQuiet       = flag.Bool("quiet",            false,   "Turn off all but the most important logging")
+  isTimestamped = flag.Bool("timestamped",      false,   "Should outputs be timestamped")
   isVersion     := flag.Bool("version",          false,   "Output the version of this app")
-  redisServer   := flag.String("redis",          ":6379", "Specify the redis server (e.g. 127.0.0.1:6379)")
+  redisServer   := flag.String("redis",          ":6379", "Specify the redis server (default 127.0.0.1:6379)")
   redisPassword := flag.String("redis-password", "",      "Specify the redis server password")
+  port          := flag.String("port",           "4005",  "Specify the web server port (default 4005)")
 
   flag.Parse()
-  webl.InitLogging(*isQuiet, *isVerbose, *isTimestamped)
+  webl.InitLogging(*isQuiet, *isVerbose, *isTimestamped, nil)
 
   showVersion()
   if *isVersion {
@@ -106,13 +118,14 @@ func main() {
   m := pat.New()
   m.Get("/static/", http.HandlerFunc(getStatic))
   m.Get("/favicon.ico", http.HandlerFunc(getStatic))
-  m.Get("/crawl/:url", http.HandlerFunc(getUrl))
+  m.Get("/u/:url", http.HandlerFunc(getUrl))
   m.Post("/", http.HandlerFunc(postUrl))
   m.Get("/", http.HandlerFunc(getRoot))
 
-  fmt.Println("Starting server, accessible at http://localhost:8080")
+  fmt.Println(fmt.Sprintf("Starting server, accessible at http://localhost:%s", *port))
+  http.Handle("/crawl", websocket.Handler(doCrawl))
   http.Handle("/", m)
-  err := http.ListenAndServe(":8080", nil)
+  err := http.ListenAndServe(fmt.Sprintf(":%s", *port), nil)
   if err != nil {
     log.Fatal("ListenAndServe: ", err)
   }

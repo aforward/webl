@@ -16,7 +16,7 @@ func main() {
 
   flag.Parse()
 
-  webl.InitLogging(*isQuiet, *isVerbose, *isTimestamped)
+  webl.InitLogging(*isQuiet, *isVerbose, *isTimestamped, nil)
   showVersion()
   if *isVersion {
     return
