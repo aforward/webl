@@ -1,0 +1,31 @@
+{{template "_html_header" .HtmlHeader}}
+
+<body class="detailspage"> 
+
+  {{if .Domain.LastAnalyzed}}
+
+    Hmmmm
+
+  {{else}}
+
+    <div class="row">
+      <div class="centered twelve columns">
+        <h1>{{.Domain.Name}}</h1>
+        <p>
+          This site has not yet been analyzed.
+        </p>
+        <input class="url" type="hidden" value="{{.Domain.Name}}" />
+        <div class="button">
+          <div class="medium crawl-button btn"><input class="crawl" type="submit" value="Crawl Now" /></div>
+          <div class="loader"></div>
+        </div>
+      </div>
+    </div>
+
+    {{template "_output"}}
+
+  {{end}}
+
+  {{template "_html_footer" .HtmlFooter}}
+</body> 
+</html>

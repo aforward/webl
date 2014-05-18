@@ -1,0 +1,8 @@
+{{define "_html_footer"}}
+  <script src='/static/js/app.js' type='text/javascript'></script>
+  <script src='/static/js/app_events.js' type='text/javascript'></script>
+  <script text="text/javascript">
+    App.host = "{{.AppHost}}";
+    {{.CustomJs}}
+  </script>
+{{end}}

@@ -11,7 +11,14 @@ import (
 )
 
 func Crawl(domainName string) {
-  INFO.Println(fmt.Sprintf("About to crawl: %s", domainName))
+
+  if (domainName == "") {
+    WARN.Println("No domain provided, nothing to crawl.")
+    return
+  }
+
+  lastAnalyzed := friendlyNow()
+  INFO.Println(fmt.Sprintf("About to crawl (%s): %s", lastAnalyzed, domainName))
 
   httpLimitChannel := initCapacity(4)
   var wg sync.WaitGroup
@@ -21,7 +28,7 @@ func Crawl(domainName string) {
   url := toUrl(domainName,"")
   name := toFriendlyName(url)
 
-  addDomain(&Resource{ Name: name, Url: url })
+  addDomain(&Resource{ Name: name, Url: url, LastAnalyzed: lastAnalyzed })
   go fetchResource(name, url, alreadyProcessed, httpLimitChannel, &wg)
   TRACE.Println("Wait...")
   wg.Wait();
@@ -54,9 +61,11 @@ func fetchResource(domainName string, currentUrl string, alreadyProcessed *set.S
       lastModified := resp.Header.Get("Last-Modified")
       TRACE.Println(fmt.Sprintf("Done Fetch (%s %s): %s",contentType, resp.Status, currentUrl))
       saveResource(&Resource{ Name: toFriendlyName(currentUrl), Url: currentUrl, Type: contentType, Status: resp.Status, StatusCode: resp.StatusCode, LastModified: lastModified })
-      if IsWebpage(contentType) {
+      if isWebpage(contentType) {
         if (!shouldProcessUrl(domainName,resp.Request.URL.String())) {
           TRACE.Println(fmt.Sprintf("Not following %s, as we redirected to a URL we should not process %s", currentUrl,resp.Request.URL.String()))
+        } else if resp.StatusCode != 200 {
+          WARN.Println(fmt.Sprintf("Not analyzing due to status code (%s): %s", resp.Status, currentUrl))
         } else {
           should_close_resp = false
           wg.Add(1);
@@ -84,7 +93,7 @@ func analyzeResource(domainName string, currentUrl string, resp *http.Response, 
   defer resp.Body.Close()
   defer io.Copy(ioutil.Discard, resp.Body)
 
-  TRACE.Println(fmt.Sprintf("Analyze: %s", currentUrl))
+  INFO.Println(fmt.Sprintf("Analyze (%s): %s", resp.Status, currentUrl))
   tokenizer := html.NewTokenizer(resp.Body)
   for { 
     token_type := tokenizer.Next() 

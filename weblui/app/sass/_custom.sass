@@ -6,7 +6,12 @@ $dark_colour: #302d28
 $default_font_family: "proxima-nova", sans-serif
 $disabled_colour: red
 
-.homepage
+$danger_colour: #cc5152
+$danger_hover_colour: lighten($danger_colour,10%)
+
+$link_colour: #3085d6 
+
+.homepage, .listpage, .detailspage
   background-color: $light_colour
   margin: 20px 2px 0 2px
   padding-bottom: 50px
@@ -15,12 +20,24 @@ $disabled_colour: red
   h2
     font-weight: 800
 
-.go-button
+.table
+  tr
+    th
+      background-color: $button_colour
+
+.crawl-button, .go-button, .link-button
   background-color: $button_colour
   float: left
   margin-right: 10px
   &:hover
     background-color: $button_hover_colour
+
+.delete-button
+  background-color: $danger_colour
+  float: left
+  margin-right: 10px
+  &:hover
+    background-color: $danger_hover_colour
 
 .disabled
   background-color: $disabled_colour
@@ -32,3 +49,38 @@ $disabled_colour: red
   height: 32px
   float: left
   padding-left: 10px
+  margin-right: 10px
+
+.link-button
+  a
+    text-decoration: none
+    &:hover
+      color: #ffffff
+a
+
+  color: $link_colour
+  text-decoration: underline
+  &:hover
+    color: $link_colour
+    font-style: italics
+
+.button-group
+  float: left
+  padding-right: 10px
+  .button
+    display: inline
+  a
+    padding-right: 10px
+    float: left
+    display: inline
+
+.terminal
+  margin: 20px 0 20px 0
+  font-family: Courier
+  color: #CCCCCC
+  background: #000000
+  border: 3px double #CCCCCC
+  padding: 10px
+  max-height: 400px
+  height: 400px
+  overflow: scroll

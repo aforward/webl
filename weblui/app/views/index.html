@@ -1,0 +1,29 @@
+{{template "_html_header" .HtmlHeader}}
+
+<body class="homepage"> 
+
+  <div class="row">
+    <div class="centered twelve columns">
+      <h2>Enter a URL</h2>
+      <div class="field">
+        <input class="input url" type="text" placeholder="e.g. a4word.com" />
+      </div>
+      <div class="button">
+        <div class="medium go-button btn"><input class="go" type="submit" value="Go" /></div>
+        <a href="/list" class="list-sitemaps-btn">list available sitemaps</a>
+        <div class="loader"></div>
+      </div>
+    </div>
+  </div>
+
+  {{template "_output"}}
+
+  <div class="row">
+    <div class="centered twelve columns">
+      <div id="canvas"></div>
+    </div>
+  </div>
+
+  {{template "_html_footer" .HtmlFooter}}
+</body> 
+</html>

@@ -47,8 +47,11 @@ func (s *MySuite) Test_toFriendlyName_path2(c *C) {
 // toUrl
 //------
 
-func (s *MySuite) Test_toUrl_as_is(c *C) {
+func (s *MySuite) Test_toUrl_rootDomain(c *C) {
   c.Check(toUrl("http://a4word.com",""),Equals,"http://a4word.com")
+  c.Check(toUrl("http://a4word.com","/"),Equals,"http://a4word.com")
+  c.Check(toUrl("http://a4word.com","#"),Equals,"http://a4word.com")
+  c.Check(toUrl("http://a4word.com","?"),Equals,"http://a4word.com")
 }
 
 func (s *MySuite) Test_toUrl_drop_slash(c *C) {
@@ -104,12 +107,12 @@ func (s *MySuite) Test_toUrl_https_path(c *C) {
 }
 
 //------
-// IsWebpage
+// isWebpage
 //------
 
-func (s *MySuite) Test_IsWebpage_html(c *C) {
-  c.Check(IsWebpage("text/html"),Equals,true)
-  c.Check(IsWebpage("text/garble"),Equals,false)
+func (s *MySuite) Test_isWebpage_html(c *C) {
+  c.Check(isWebpage("text/html"),Equals,true)
+  c.Check(isWebpage("text/garble"),Equals,false)
 }
 
 //------

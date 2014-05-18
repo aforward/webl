@@ -56,7 +56,7 @@ func appendSitemapChildren(urlSet *UrlSet, resource *Resource, alreadyProcessed 
       continue
     } else if (link.Status == "missing") {
       TRACE.Println(fmt.Sprintf("Skipping invalid link: %s", link.Url))
-    } else if (!IsWebpage(link.Type)) {
+    } else if (!isWebpage(link.Type)) {
       TRACE.Println(fmt.Sprintf("Skipping non-webpage (%s %s): %s", link.Type, link.Status, link.Url))
     } else if (link.StatusCode == 404 || link.StatusCode >= 500) {
       TRACE.Println(fmt.Sprintf("Skipping invalid resource (%s %s): %s", link.Type, link.Status, link.Url))

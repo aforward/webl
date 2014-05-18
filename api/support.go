@@ -34,7 +34,7 @@ func toUrl(provided string, path string) (processed_url string) {
     return
   }
 
-  if path == "#" {
+  if path == "#" || path == "/" || path == "?" {
     path = ""
   }
 
@@ -69,7 +69,7 @@ func shouldProcessUrl(provided string, current string) (bool) {
   return provided_domain == current_domain
 }
 
-func IsWebpage(contentType string) (bool) {
+func isWebpage(contentType string) (bool) {
   return contentType == "text/html"
 }
 

@@ -3,55 +3,40 @@
 // CRAWL
 //*****************
 
+$(".go").click(function() {
+  var me = $(this);
+  var url = $(".url").val();
+  App.go(me,url);
+});
+
 $(".crawl").click(function() {
-  var url = $(".url").val() 
+  var me = $(this);
+  App.crawl(me,me.data("url"));
+});
 
-  App.waiting();
-  App.disable(".url");
-  App.disable(".crawl");
+//*****************
+// DELETE
+//*****************
 
-  if (window["WebSocket"]) {
-    console.log("websocket");
-    var socket = new WebSocket("ws://localhost:4005/crawl");
+$(".delete").click(function() {
+  var me = $(this)
+  var url = me.data("url");
 
-    socket.onopen = function(event) {
-      socket.send(url);
-    };
+  App.waiting(me);
+  App.disable(me,".crawl");
+  App.disable(me,".delete");
 
-    socket.onmessage = function(event) {
-      var data = event.data;
-      if (data == "exit") {
-        App.enable(".url");
-        App.enable(".crawl");
-        App.done_waiting(true);
-        socket.close();
-      } else {
-        $(".output").append(data);
-      }
-    };
-
-  } else {
-    var params = { "url": url, };
-    $.ajax({ type: "POST", url: "/crawl", data: params }).done(function( answer ) {
-      App.done_waiting();
-      alert(answer)
+  $.ajax({ type: "POST", url: "/delete/" + url, data: {} }).done(function( answer ) {
+    App.done_waiting(me);
+    var tr = me.parents(".domain-row");
+    tr.fadeOut(400, function(){
+      tr.remove();
     });
-  }
+  });
 
 });
 
+//*****************
+// ON LOAD
+//*****************
 
-      $(function() {
-        var ws = new WebSocket("ws://localhost:8080/echo");
-        ws.onmessage = function(e) {
-          console.log("受信メッセージ:" + event.data);
-        };
-
-        var $ul = $('#msg-list');
-        $('#sendBtn').click(function(){
-          var data = $('#name').val();
-          ws.send(data);
-          console.log("送信メッセージ:" + data);
-          $('<li>').text(data).appendTo($ul);
-        });
-      });
