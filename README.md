@@ -45,12 +45,10 @@ You can now crawl websites through the UI
 TODO
 ------------
 
-* Enable output of weblui when downloading website
-* Add HTML output
-* Display sitemap (html/xml) links
+* Strengthen domain format inputs (e.g. http:// and trailing /)
+* Resolve "//" as the same protocol as calling page
+* Enable viewing of sitemap.xml
 * Display graph link
-* Look at different graphing tool
-* Grab the title from pages to present better meta-data for the html sitemap
-* Present the resources in a table, highlighting issues pages (e.g. 301, 404, 500)
 * Read robots.txt and ensure following the directives
-
+* Review code, extract additional tests
+* Create docker deployment
