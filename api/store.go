@@ -10,18 +10,6 @@ var (
   Pool *redis.Pool
 )
 
-type Resource struct {
-  Name string
-  LastAnalyzed string
-  Url string
-  Status string
-  StatusCode int
-  LastModified string
-  Type string
-  Links []Resource
-  Assets []Resource
-}
-
 func NewPool(server, password string) *redis.Pool {
   return &redis.Pool{
     MaxIdle: 3,
@@ -113,7 +101,7 @@ func saveResource(resource *Resource) {
 func saveEdge(domainName string, fromUrl string, toUrl string) {
   conn := Pool.Get()
   defer conn.Close()
-  TRACE.Println(fmt.Sprintf("Saving edge between %s --> %s", fromUrl, toUrl))
+  TRACE.Println(fmt.Sprintf("Saving edge between %s -> %s", fromUrl, toUrl))
   conn.Do("SADD",fmt.Sprintf("edges:::%s",fromUrl),toUrl)
 }
 
@@ -133,11 +121,17 @@ func deleteKeys(conn redis.Conn, keyFilter string) {
 }
 
 func LoadDomain(domain string, isBasic bool) Resource {
-  allResources := make(map[string]Resource)
-  return loadResource(toUrl(domain,""),isBasic,allResources)
+  resource := LoadResource(toUrl(domain,""), isBasic)
+  resource.Name = domain
+  return resource
 }
 
-func loadResource(url string, isBasic bool, allResources map[string]Resource) (resource Resource) {
+func LoadResource(domain string, isBasic bool) Resource {
+  allResources := make(map[string]Resource)
+  return findResource(toUrl(domain,""), true, isBasic, allResources)
+}
+
+func findResource(url string, isRoot bool, isBasic bool, allResources map[string]Resource) (resource Resource) {
   conn := Pool.Get()
   defer conn.Close()
 
@@ -159,31 +153,38 @@ func loadResource(url string, isBasic bool, allResources map[string]Resource) (r
     FailOnError(err)
 
     resource = Resource{ Name: r.Name, LastAnalyzed: r.LastAnalyzed, Url: r.Url, Status: r.Status, StatusCode: r.StatusCode, Type: r.Type }
-
     allResources[r.Url] = resource
+    if !isRoot && isBasic {
+      return
+    }
 
     linksKey := fmt.Sprintf("edges:::%s",r.Url)
     members, err :=  redis.Strings(conn.Do("SMEMBERS",linksKey))
-    resource.Links = make([]Resource,len(members))
+    resource.Links = make([]Resource,0)
+    resource.Assets = make([]Resource,0)
     var possibleLink Resource
     for _, link := range members {
       if linkResource,ok := allResources[link]; ok {
-        TRACE.Println(fmt.Sprintf("Reused link between %s --> %s", r.Url, link))
+        TRACE.Println(fmt.Sprintf("Reused link between %s -> %s", r.Url, link))
         possibleLink = linkResource
       } else {
-        TRACE.Println(fmt.Sprintf("Looking up link between %s --> %s", r.Url, link))
-        possibleLink = loadResource(link,isBasic,allResources)
+        TRACE.Println(fmt.Sprintf("Looking up link between %s -> %s", r.Url, link))
+        possibleLink = findResource(link,false,isBasic,allResources)
         allResources[possibleLink.Url] = possibleLink
       }
       if (possibleLink.Url == "") {
         continue
       }
-      if (!isBasic || isWebpage(possibleLink.Type)) {
+
+      if IsWebpage(possibleLink.Type) || possibleLink.Type == "" {
         resource.Links = append(resource.Links, possibleLink)
+      } else {
+        resource.Assets = append(resource.Assets, possibleLink)
       }
+
     }
   } else {
-    resource = Resource{ Name: toFriendlyName(url), Url: url, Status: "missing" }
+    resource = Resource{ Name: ToFriendlyName(url), Url: url, Status: "missing" }
   }
   return
 }

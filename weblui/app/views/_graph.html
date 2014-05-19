@@ -1,0 +1,28 @@
+{{define "_graph"}}
+
+<div class="row">
+  <div class="centered twelve columns">
+    <div id="domainGraph"></div>
+  </div>
+</div>
+
+<script text="text/javascript">
+  // h = 500;
+
+  var g = new Graph();
+  var w = $("#domainGraph").parent().width();
+  var h = 500;
+
+  var renderer = new Graph.Renderer.Raphael('domainGraph', g, w, h);
+  var layouter = new Graph.Layout.Spring(g);
+  {{range .Edges}}
+    {{if .FromName}}
+      g.addEdge("{{.FromName}}", "{{.ToName}}");
+    {{end}}
+  {{end}}
+   
+  layouter.layout();
+  renderer.draw();
+
+</script>
+{{end}}

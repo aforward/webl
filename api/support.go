@@ -5,13 +5,47 @@ import (
   "fmt"
   "net/url"
   "code.google.com/p/go.net/html"
+  "gopkg.in/fatih/set.v0"
 )
+
+type Resource struct {
+  Name string
+  LastAnalyzed string
+  Url string
+  Status string
+  StatusCode int
+  LastModified string
+  Type string
+  Links []Resource
+  Assets []Resource
+}
+
+func (resource *Resource) FriendlyName() string {
+  return ToFriendlyName(resource.Url)
+}
+
+func (resource *Resource) FriendlyType() string {
+  return ToFriendlyType(resource.Type)
+}
+
+func (resource *Resource) FriendlyStatus() string {
+  return ToFriendlyStatus(resource.Status,resource.StatusCode)
+}
+
+type Graph struct {
+  Edges []Edge 
+}
+
+type Edge struct {
+  FromName string
+  ToName string
+}
 
 func Version() string {
   return "0.0.1"
 }
 
-func toFriendlyName(raw_url string) (name string) {
+func ToFriendlyName(raw_url string) (name string) {
   u, _ := url.Parse(raw_url)
 
   if (u.Path == "" || u.Path == "/") {
@@ -20,6 +54,32 @@ func toFriendlyName(raw_url string) (name string) {
     name = u.Path
   }
   return
+}
+
+func ToFriendlyType(raw_type string) string {
+  if raw_type == "" {
+    return ""
+  }
+
+  all := strings.Split(raw_type, "/")
+  name := all[len(all) - 1]
+  switch name {
+  case "x-javascript":
+    return "js"
+  case "msword":
+    return "doc"
+  case "x-shockwave-flash":
+    return "flash"
+  }
+  return name
+}
+
+func ToFriendlyStatus(status string, code int) string {
+  switch status {
+  case "missing":
+    return "--"
+  }
+  return fmt.Sprintf("%d",code)
 }
 
 func toUrl(provided string, path string) (processed_url string) {
@@ -69,8 +129,8 @@ func shouldProcessUrl(provided string, current string) (bool) {
   return provided_domain == current_domain
 }
 
-func isWebpage(contentType string) (bool) {
-  return contentType == "text/html"
+func IsWebpage(contentType string) (bool) {
+  return contentType == "text/html" || strings.Contains(contentType,"text/html")
 }
 
 func resource_path(token html.Token) (string) {
@@ -89,6 +149,35 @@ func initCapacity(maxOutstanding int) (sem chan int) {
     sem <- 1
   }
   return
+}
+
+func CreateGraph(domain *Resource) Graph {
+  edges := make([]Edge,10)
+  edges = flattenEdges(edges,domain,set.New())
+  return Graph{ Edges: edges }
+}
+
+func flattenEdges(edges []Edge, node *Resource, alreadyProcessed *set.Set) []Edge {
+  // root.Links = append(root.Links,node.Links...)
+  for _,link := range node.Links {
+    if IsWebpage(link.Type) {
+      r2l := fmt.Sprintf("%s -> %s", node.Name, link.Name) 
+      l2r := fmt.Sprintf("%s -> %s", link.Name, node.Name) 
+
+      if link.StatusCode == 200 && !alreadyProcessed.Has(r2l) && !alreadyProcessed.Has(l2r) {
+        edges = append(edges,Edge{ FromName: node.Name, ToName: link.Name })
+      }
+
+      alreadyProcessed.Add(r2l)
+      alreadyProcessed.Add(l2r)
+      
+      if !alreadyProcessed.Has(link.Url) {
+        alreadyProcessed.Add(link.Url)
+        edges = flattenEdges(edges,&link,alreadyProcessed)
+      }
+    }
+  } 
+  return edges
 }
 
 

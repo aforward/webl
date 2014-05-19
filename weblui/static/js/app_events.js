@@ -28,15 +28,18 @@ $(".delete").click(function() {
 
   $.ajax({ type: "POST", url: "/delete/" + url, data: {} }).done(function( answer ) {
     App.done_waiting(me);
-    var tr = me.parents(".domain-row");
-    tr.fadeOut(400, function(){
-      tr.remove();
-    });
+
+    if (window.location.pathname == "/list") {
+      var tr = me.parents(".domain-row");
+      tr.fadeOut(400, function(){
+        tr.remove();
+      });
+      $(".output").html("");
+    } else {
+      window.location.assign("/list");      
+    }
+
   });
 
 });
-
-//*****************
-// ON LOAD
-//*****************
 

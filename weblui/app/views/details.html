@@ -2,9 +2,69 @@
 
 <body class="detailspage"> 
 
+  {{ template "_header_links" }}
+
   {{if .Domain.LastAnalyzed}}
 
-    Hmmmm
+    <div class="row">
+      <div class="centered twelve columns">
+        <table class="table">
+          <thead>
+            <tr >
+              <th>
+                {{ template "_domain_links" .Domain }}
+              </th>
+              <th>Type</th>
+              <th>Status Code</th>
+            </tr>
+          </thead>
+          <tbody>
+
+            <tr class="terminal-container">
+              <td colspan="3">
+                {{template "_output"}}
+              </td>
+            </tr>
+
+            {{range .Sitemap.Urls}}
+              <tr class="page statuscode-{{.StatusCode}}">
+                <td><a href="{{.Loc}}">{{.FriendlyName}}</a></td>
+                <td>Webpage</th>
+                <td>{{.StatusCode}}</td>
+              </tr>
+              {{range $i, $resource := .Assets}}
+                {{if eq $i 0}}
+                  <tr>
+                    <td class="asset-resource">ASSETS</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                  </tr>
+                {{end}}
+                <tr class="document-type-{{.FriendlyType}} statuscode-{{$resource.StatusCode}}">
+                  <td class="asset-resource"><a href="{{$resource.Url}}">{{$resource.FriendlyName}}</a></td>
+                  <td title="The document type is {{.Type}}">{{.FriendlyType}}</td>
+                  <td>{{$resource.StatusCode}}</td>
+                </tr>
+              {{end}}
+              {{range $i, $resource := .Links}}
+                {{if eq $i 0}}
+                  <tr>
+                    <td class="link-resource">LINKS</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                  </tr>
+                {{end}}
+                <tr class="document-type-link statuscode-{{$resource.StatusCode}}">
+                  <td class="link-resource"><a href="{{$resource.Url}}">{{$resource.Url}}</a></td>
+                  <td>Link</td>
+                  <td>{{$resource.FriendlyStatus}}</td>
+                </tr>
+              {{end}}
+            {{end}}
+          </tbody>
+        </table>
+      </div>
+    </div>
 
   {{else}}
 
@@ -16,8 +76,8 @@
         </p>
         <input class="url" type="hidden" value="{{.Domain.Name}}" />
         <div class="button">
-          <div class="medium crawl-button btn"><input class="crawl" type="submit" value="Crawl Now" /></div>
-          <div class="loader"></div>
+          <div class="medium crawl-button btn"><input class="crawl" type="submit" data-url="{{.Domain.Name}}" value="Crawl Now" /></div>
+          <div class="loader default-background"></div>
         </div>
       </div>
     </div>
@@ -25,6 +85,7 @@
     {{template "_output"}}
 
   {{end}}
+
 
   {{template "_html_footer" .HtmlFooter}}
 </body> 

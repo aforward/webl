@@ -7442,89 +7442,121 @@ table.rounded > tbody:first-child tr:first-child td {
 }
 /* line 20, ../app/sass/_custom.sass */
 .homepage h2, .listpage h2, .detailspage h2 {
+  font-size: 12pt;
   font-weight: 800;
 }
 
-/* line 25, ../app/sass/_custom.sass */
+/* line 24, ../app/sass/_custom.sass */
+a.title {
+  color: white;
+  text-decoration: none;
+  margin-right: 10px;
+}
+/* line 28, ../app/sass/_custom.sass */
+a.title:hover {
+  color: white;
+  text-decoration: underline;
+}
+
+/* line 34, ../app/sass/_custom.sass */
 .table tr th {
   background-color: #215f8b;
 }
 
-/* line 28, ../app/sass/_custom.sass */
+/* line 37, ../app/sass/_custom.sass */
 .crawl-button, .go-button, .link-button {
   background-color: #215f8b;
   float: left;
   margin-right: 10px;
 }
-/* line 32, ../app/sass/_custom.sass */
+/* line 41, ../app/sass/_custom.sass */
 .crawl-button:hover, .go-button:hover, .link-button:hover {
   background-color: #19486a;
 }
 
-/* line 35, ../app/sass/_custom.sass */
+/* line 44, ../app/sass/_custom.sass */
 .delete-button {
   background-color: #cc5152;
   float: left;
   margin-right: 10px;
 }
-/* line 39, ../app/sass/_custom.sass */
+/* line 48, ../app/sass/_custom.sass */
 .delete-button:hover {
   background-color: #d87879;
 }
 
-/* line 42, ../app/sass/_custom.sass */
+/* line 51, ../app/sass/_custom.sass */
 .disabled {
   background-color: red;
 }
 
-/* line 45, ../app/sass/_custom.sass */
+/* line 54, ../app/sass/_custom.sass */
 .loader {
-  background: #eef1f2 url("/static/i/loader.gif") no-repeat right top;
   display: none;
-  width: 32px;
-  height: 32px;
   float: left;
   padding-left: 10px;
   margin-right: 10px;
 }
 
-/* line 55, ../app/sass/_custom.sass */
+/* line 60, ../app/sass/_custom.sass */
+.white-background {
+  background: white url("/static/i/loader_white.gif") no-repeat right top;
+  width: 32px;
+  height: 32px;
+}
+
+/* line 65, ../app/sass/_custom.sass */
+.default-background {
+  background: #eef1f2 url("/static/i/loader.gif") no-repeat right top;
+}
+
+/* line 68, ../app/sass/_custom.sass */
+.table-header-background {
+  background: #215f8b url("/static/i/loader.gif") no-repeat right top;
+}
+
+/* line 73, ../app/sass/_custom.sass */
 .link-button a {
   text-decoration: none;
 }
-/* line 57, ../app/sass/_custom.sass */
+/* line 75, ../app/sass/_custom.sass */
 .link-button a:hover {
   color: white;
 }
 
-/* line 59, ../app/sass/_custom.sass */
+/* line 77, ../app/sass/_custom.sass */
 a {
   color: #3085d6;
   text-decoration: underline;
 }
-/* line 63, ../app/sass/_custom.sass */
+/* line 81, ../app/sass/_custom.sass */
 a:hover {
   color: #3085d6;
   font-style: italics;
 }
 
-/* line 67, ../app/sass/_custom.sass */
+/* line 85, ../app/sass/_custom.sass */
 .button-group {
   float: left;
   padding-right: 10px;
 }
-/* line 70, ../app/sass/_custom.sass */
+/* line 88, ../app/sass/_custom.sass */
 .button-group .button {
   display: inline;
 }
-/* line 72, ../app/sass/_custom.sass */
+/* line 90, ../app/sass/_custom.sass */
 .button-group a {
   padding-right: 10px;
   float: left;
   display: inline;
 }
 
-/* line 77, ../app/sass/_custom.sass */
+/* line 95, ../app/sass/_custom.sass */
+.terminal-container {
+  display: none;
+}
+
+/* line 98, ../app/sass/_custom.sass */
 .terminal {
   margin: 20px 0 20px 0;
   font-family: Courier;
@@ -7535,4 +7567,92 @@ a:hover {
   max-height: 400px;
   height: 400px;
   overflow: scroll;
+}
+
+/* line 109, ../app/sass/_custom.sass */
+.inline {
+  display: inline;
+  float: left;
+}
+
+/* line 113, ../app/sass/_custom.sass */
+.pull-left {
+  display: inline;
+  float: left;
+}
+
+/* line 117, ../app/sass/_custom.sass */
+.pull-right {
+  display: inline;
+  float: right;
+}
+
+/* line 121, ../app/sass/_custom.sass */
+.statuscode-500, .statuscode-404 {
+  background-color: #f9aa8b !important;
+  color: #ff4f64 !important;
+}
+/* line 124, ../app/sass/_custom.sass */
+.statuscode-500 a, .statuscode-404 a {
+  color: #ff4f64 !important;
+}
+
+/* line 127, ../app/sass/_custom.sass */
+.page {
+  background-color: #dfeccb;
+}
+
+/* line 130, ../app/sass/_custom.sass */
+.asset-resource, .link-resource {
+  padding-left: 30px;
+}
+
+/* line 134, ../app/sass/_custom.sass */
+.document-type-link {
+  color: #90c0f8;
+}
+/* line 136, ../app/sass/_custom.sass */
+.document-type-link a {
+  color: #90c0f8;
+}
+
+/* line 139, ../app/sass/_custom.sass */
+.document-type-js {
+  color: #948a71;
+}
+/* line 141, ../app/sass/_custom.sass */
+.document-type-js a {
+  color: #948a71;
+}
+
+/* line 144, ../app/sass/_custom.sass */
+.document-type-css {
+  color: #ecb163;
+}
+/* line 146, ../app/sass/_custom.sass */
+.document-type-css a {
+  color: #ecb163;
+}
+
+/* line 149, ../app/sass/_custom.sass */
+.document-type-png, .document-type-jpeg, .document-type-ogg, .document-type-flash, .document-type-mp4 {
+  color: #94d5b3;
+}
+/* line 151, ../app/sass/_custom.sass */
+.document-type-png a, .document-type-jpeg a, .document-type-ogg a, .document-type-flash a, .document-type-mp4 a {
+  color: #94d5b3;
+}
+
+/* line 154, ../app/sass/_custom.sass */
+.document-type-pdf, .document-type-doc, .document-type-plain {
+  color: #edbb24;
+}
+/* line 156, ../app/sass/_custom.sass */
+.document-type-pdf a, .document-type-doc a, .document-type-plain a {
+  color: #edbb24;
+}
+
+/* line 160, ../app/sass/_custom.sass */
+.header-links a {
+  padding-left: 20px;
 }

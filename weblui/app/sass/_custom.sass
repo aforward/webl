@@ -18,7 +18,16 @@ $link_colour: #3085d6
   font-family: $default_font_family
   color: $dark_colour
   h2
+    font-size: 12pt 
     font-weight: 800
+
+a.title
+  color: white
+  text-decoration: none
+  margin-right: 10px
+  &:hover
+    color: white
+    text-decoration: underline
 
 .table
   tr
@@ -43,13 +52,22 @@ $link_colour: #3085d6
   background-color: $disabled_colour
 
 .loader
-  background: $light_colour url('/static/i/loader.gif') no-repeat right top
   display: none
-  width: 32px
-  height: 32px
   float: left
   padding-left: 10px
   margin-right: 10px
+
+.white-background
+  background: #FFFFFF url('/static/i/loader_white.gif') no-repeat right top
+  width: 32px
+  height: 32px
+
+.default-background
+  background: $light_colour url('/static/i/loader.gif') no-repeat right top
+
+.table-header-background  
+  background: $button_colour url('/static/i/loader.gif') no-repeat right top
+
 
 .link-button
   a
@@ -74,6 +92,9 @@ a
     float: left
     display: inline
 
+.terminal-container
+  display: none
+
 .terminal
   margin: 20px 0 20px 0
   font-family: Courier
@@ -84,3 +105,57 @@ a
   max-height: 400px
   height: 400px
   overflow: scroll
+
+.inline
+  display: inline
+  float: left
+
+.pull-left
+  display: inline
+  float: left
+
+.pull-right
+  display: inline
+  float: right
+
+.statuscode-500, .statuscode-404
+  background-color: #f9aa8b !important
+  color: #FF4F64 !important
+  a
+    color: #FF4F64 !important
+
+.page
+  background-color: #DFECCB
+
+.asset-resource, .link-resource
+  padding-left: 30px
+
+
+.document-type-link
+  color: #90C0F8
+  a
+    color: #90C0F8
+
+.document-type-js
+  color: #948A71
+  a
+    color: #948A71
+
+.document-type-css
+  color: #ECB163
+  a
+    color: #ECB163
+
+.document-type-png, .document-type-jpeg, .document-type-ogg, .document-type-flash, .document-type-mp4
+  color: #94D5B3
+  a
+    color: #94D5B3
+
+.document-type-pdf, .document-type-doc, .document-type-plain
+  color: #EDBB24
+  a
+    color: #EDBB24
+
+.header-links
+  a
+    padding-left: 20px

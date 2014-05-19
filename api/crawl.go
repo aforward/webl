@@ -10,11 +10,11 @@ import (
   "io/ioutil"
 )
 
-func Crawl(domainName string) {
+func Crawl(domainName string) bool {
 
   if (domainName == "") {
     WARN.Println("No domain provided, nothing to crawl.")
-    return
+    return false
   }
 
   lastAnalyzed := friendlyNow()
@@ -26,7 +26,7 @@ func Crawl(domainName string) {
 
   alreadyProcessed := set.New()
   url := toUrl(domainName,"")
-  name := toFriendlyName(url)
+  name := ToFriendlyName(url)
 
   addDomain(&Resource{ Name: name, Url: url, LastAnalyzed: lastAnalyzed })
   go fetchResource(name, url, alreadyProcessed, httpLimitChannel, &wg)
@@ -35,8 +35,9 @@ func Crawl(domainName string) {
   TRACE.Println("Done waiting.")
 
   savedResource := LoadDomain(domainName,true)
-  writeSitemap(&savedResource, fmt.Sprintf("./tmp/%s.sitemap.xml", domainName))
+  WriteSitemap(&savedResource, fmt.Sprintf("./tmp/%s.sitemap.xml", domainName))
   INFO.Println(fmt.Sprintf("Done crawing: %s", domainName))
+  return true
 }
 
 func fetchResource(domainName string, currentUrl string, alreadyProcessed *set.Set, httpLimitChannel chan int, wg *sync.WaitGroup) {
@@ -44,7 +45,7 @@ func fetchResource(domainName string, currentUrl string, alreadyProcessed *set.S
   if alreadyProcessed.Has(currentUrl) {
     TRACE.Println(fmt.Sprintf("Duplicate (skipping): %s", currentUrl))
   } else if shouldProcessUrl(domainName,currentUrl) {
-    saveResource(&Resource{ Name: toFriendlyName(currentUrl), Url: currentUrl })    
+    saveResource(&Resource{ Name: ToFriendlyName(currentUrl), Url: currentUrl })    
     alreadyProcessed.Add(currentUrl)
     TRACE.Println(fmt.Sprintf("Fetch: %s", currentUrl))
 
@@ -60,8 +61,8 @@ func fetchResource(domainName string, currentUrl string, alreadyProcessed *set.S
       contentType := resp.Header.Get("Content-Type")
       lastModified := resp.Header.Get("Last-Modified")
       TRACE.Println(fmt.Sprintf("Done Fetch (%s %s): %s",contentType, resp.Status, currentUrl))
-      saveResource(&Resource{ Name: toFriendlyName(currentUrl), Url: currentUrl, Type: contentType, Status: resp.Status, StatusCode: resp.StatusCode, LastModified: lastModified })
-      if isWebpage(contentType) {
+      saveResource(&Resource{ Name: ToFriendlyName(currentUrl), Url: currentUrl, Type: contentType, Status: resp.Status, StatusCode: resp.StatusCode, LastModified: lastModified })
+      if IsWebpage(contentType) {
         if (!shouldProcessUrl(domainName,resp.Request.URL.String())) {
           TRACE.Println(fmt.Sprintf("Not following %s, as we redirected to a URL we should not process %s", currentUrl,resp.Request.URL.String()))
         } else if resp.StatusCode != 200 {

@@ -2,52 +2,43 @@
 
 <body class="listpage"> 
 
-  <div class="wtf" data-role="page" data-last-value="43" data-hidden="true" data-options='{"name":"John"}'></div>
+  {{ template "_header_links" }}
 
   <div class="row">
     <div class="centered twelve columns">
-      {{if .AllDomains}}
-        <h1>Sitemaps</h1>
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Domain</th>
-              <th>Analyzed</th>
-              <th>&nbsp;</th>
-            </tr>
-          </thead>
-          <tbody>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Domain</th>
+            <th>Analyzed</th>
+            <th>&nbsp;</th>
+          </tr>
+        </thead>
+        <tbody>
         {{range .AllDomains}}
           <tr class="domain-row">
-            <td>
-              <div class="button-group">
-                <a href="/details/{{.Name}}">{{.Name}}</a>
-                <div class="button">
-                  <div class="small btn link-button"><a href="{{.Url}}">»</a></div>
-                </div>
-              </div>
-            </td>
+            <td><a href="/details/{{.Name}}">{{.Name}}</a></td>
             <td>{{.LastAnalyzed}}</td>
             <td>
-              <div class="button-group">
-                <div class="button">
-                  <div class="small btn crawl-button"><input class="crawl" type="submit" value="↺" data-url="{{.Name}}" title="Click here to re-analyze {{.Name}}" /></div>
-                  <div class="small btn delete-button"><input class="delete" type="submit" value="✖" data-url="{{.Name}}" title="Click here to delete {{.Name}}" /></div>
-                  <div class="loader"></div>
-                </div>
-              </div>
-            </td>
+              {{ template "_domain_links" . }}
+           </td>
           </tr>
         {{end}}
-          </tbody>
-        </table>
+        <tr class="new-domain-row">
+          <td colspan="3">
+            <h2>Add Another Domain</h2>
+            <div class="field">
+              <input class="input url" type="text" placeholder="e.g. a4word.com" />
+            </div>
+            <div class="button">
+              <div class="medium go-button btn"><input class="go" type="submit" value="Go" /></div>
+              <div class="loader default-background"></div>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
 
-      {{else}}
-        <p>No sitemaps available, redirecting you to home page</p>
-        <script>
-          window.location.assign("/")
-        </script>
-      {{end}}
     </div>
   </div>
 

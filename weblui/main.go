@@ -11,7 +11,6 @@ import (
   "github.com/garyburd/redigo/redis"
   "flag"
   "github.com/aforward/webl/api"
-  "gopkg.in/fatih/set.v0"
   "code.google.com/p/go.net/websocket"
 )
 
@@ -28,6 +27,7 @@ func initWebViews() map[string]*template.Template {
   webViews["list"] = makeHtmlView("list")
   webViews["url"] = makeHtmlView("url")
   webViews["details"] = makeHtmlView("details")
+  webViews["graph"] = makeHtmlView("graph")
   return webViews
 }
 
@@ -37,6 +37,9 @@ func makeHtmlView(viewName string) *template.Template {
     "app/views/_html_header.html",
     "app/views/_html_footer.html",
     "app/views/_output.html",
+    "app/views/_graph.html",
+    "app/views/_header_links.html",
+    "app/views/_domain_links.html",
   )
   return t
 }
@@ -57,10 +60,6 @@ func v(name string, r *http.Request) string {
 //-----------
 // VIEWS
 //-----------
-
-type Graph struct {
-  Edges []Edge 
-}
 
 type HtmlHeader struct {
   Title string
@@ -86,6 +85,14 @@ type DetailsPage struct {
   HtmlHeader *HtmlHeader
   HtmlFooter *HtmlFooter
   Domain *webl.Resource
+  Sitemap *webl.Sitemap
+}
+
+type GraphPage struct {
+  HtmlHeader *HtmlHeader
+  HtmlFooter *HtmlFooter
+  Domain *webl.Resource
+  Graph *webl.Graph
 }
 
 //-----------
@@ -97,7 +104,7 @@ func homepage(w http.ResponseWriter, r *http.Request) {
   webViews["index"].Execute(w,page)
 }
 
-func listSitemaps(w http.ResponseWriter, r *http.Request) {
+func listDomains(w http.ResponseWriter, r *http.Request) {
   page := ListPage{ 
     HtmlHeader: &HtmlHeader{ Title: "webl -- listing sitemaps" }, 
     HtmlFooter: &HtmlFooter{ AppHost: host }, 
@@ -106,21 +113,30 @@ func listSitemaps(w http.ResponseWriter, r *http.Request) {
   webViews["list"].Execute(w,page)
 }
 
-func details(w http.ResponseWriter, r *http.Request) {
+func showSitemap(w http.ResponseWriter, r *http.Request) {
   domain := webl.LoadDomain(v("url",r),false)
+  urlSet := webl.GenerateSitemap(&domain,false)
+
   page := DetailsPage{ 
     HtmlHeader: &HtmlHeader{ Title: fmt.Sprintf("%s sitemap (using webl)",domain.Name) }, 
     HtmlFooter: &HtmlFooter{ AppHost: host }, 
     Domain: &domain,
+    Sitemap: urlSet,
   }
   webViews["details"].Execute(w, page)
 }
 
-func getUrl(w http.ResponseWriter, r *http.Request) {
-  edges := make([]Edge,10)
-  root := webl.LoadDomain(v("url",r),false)
-  edges = flatten(edges,&root,set.New())
-  webViews["url"].Execute(w, Graph{ Edges: edges })
+func showGraph(w http.ResponseWriter, r *http.Request) {
+  domain := webl.LoadDomain(v("url",r),false)
+  graph := webl.CreateGraph(&domain)
+
+  page := GraphPage{ 
+    HtmlHeader: &HtmlHeader{ Title: fmt.Sprintf("%s sitemap (using webl)",domain.Name) }, 
+    HtmlFooter: &HtmlFooter{ AppHost: host }, 
+    Domain: &domain,
+    Graph: &graph,
+  }
+  webViews["graph"].Execute(w, page)
 }
 
 func postUrl(w http.ResponseWriter, r *http.Request) {
@@ -142,7 +158,6 @@ func deleteAllDomains(w http.ResponseWriter, r *http.Request) {
   fmt.Fprintf(w, "true")
 }
 
-
 func checkDomain(w http.ResponseWriter, r *http.Request) {
   domain := webl.LoadDomain(v("url",r),false)
   if domain.LastAnalyzed != "" {
@@ -156,8 +171,13 @@ func doCrawl(ws *websocket.Conn) {
   webl.InitLogging(*isQuiet, *isVerbose, *isTimestamped, ws)
   var url string
   websocket.Message.Receive(ws, &url)
-  webl.Crawl(url)
-  websocket.Message.Send(ws, "exit")
+  isOk := webl.Crawl(url)
+
+  if isOk {
+    websocket.Message.Send(ws, "exit")
+  } else {
+    websocket.Message.Send(ws, "error")
+  }
 }
 
 //-----------
@@ -195,10 +215,10 @@ func main() {
   m := pat.New()
   m.Get("/static/", http.HandlerFunc(getStatic))
   m.Get("/favicon.ico", http.HandlerFunc(getStatic))
-  m.Get("/u/:url", http.HandlerFunc(getUrl))
-  m.Get("/details/:url", http.HandlerFunc(details))
+  m.Get("/details/:url", http.HandlerFunc(showSitemap))
+  m.Get("/graph/:url", http.HandlerFunc(showGraph))
   m.Get("/", http.HandlerFunc(homepage))
-  m.Get("/list", http.HandlerFunc(listSitemaps))
+  m.Get("/list", http.HandlerFunc(listDomains))
   m.Get("/kill", http.HandlerFunc(deleteAllDomains))
   m.Post("/delete/:url", http.HandlerFunc(deleteDomain))
   m.Get("/exists/:url", http.HandlerFunc(checkDomain))

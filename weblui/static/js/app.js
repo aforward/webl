@@ -28,6 +28,11 @@ App.done_waiting = function(me)
 
 App.crawl = function(me,url)
 {
+  $(".terminal-container").show();
+  App.waiting(me);
+  App.disable(me,".url");
+  App.disable(me,".crawl");
+
   $(".output").html("");
   if (window["WebSocket"]) {
     var socket = new WebSocket("ws://"+ App.host +"/ws/crawl");
@@ -38,12 +43,18 @@ App.crawl = function(me,url)
 
     socket.onmessage = function(event) {
       var data = event.data;
-      if (data == "exit") {
+      if (data == "exit" || data == "error") {
         App.enable(me,".url");
         App.enable(me,".crawl");
         App.done_waiting(me);
-        var sitemap_url = "http://" + App.host + "/details/" + url;
-        $(".output").append("View sitemap at <a href=\""+ sitemap_url +"\">" + sitemap_url  + "</a><br />");
+        if (data == "exit") {
+          var sitemap_url = "http://" + App.host + "/details/" + url;
+          var graph_url = "http://" + App.host + "/graph/" + url;
+          var list_url = "http://" + App.host + "/list";
+          $(".output").append("View all analyzed domains at at <a href=\""+ list_url +"\">" + list_url  + "</a><br />");
+          $(".output").append("View sitemap at <a href=\""+ sitemap_url +"\">" + sitemap_url  + "</a><br />");
+          $(".output").append("View graph at <a href=\""+ graph_url +"\">" + graph_url  + "</a><br />");
+        }
         socket.close();
       } else {
         $(".output").append(data + "<br />");
@@ -62,6 +73,7 @@ App.crawl = function(me,url)
 
 App.go = function(me,url) 
 {
+  $(".terminal-container").show();
   $(".output").html("");
 
   App.waiting(me);

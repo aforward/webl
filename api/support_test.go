@@ -24,23 +24,43 @@ func (s *MySuite) Test_version_should_be_set(c *C) {
 }
 
 //------
-// toFriendlyName
+// ToFriendlyName
 //------
 
-func (s *MySuite) Test_toFriendlyName_domainName(c *C) {
-  c.Check(toFriendlyName("http://a4word.com"),Equals,"a4word.com")
+func (s *MySuite) Test_ToFriendlyName_domainName(c *C) {
+  c.Check(ToFriendlyName("http://a4word.com"),Equals,"a4word.com")
 }
 
-func (s *MySuite) Test_toFriendlyName_domainName2(c *C) {
-  c.Check(toFriendlyName("http://a4word.com/"),Equals,"a4word.com")
+func (s *MySuite) Test_ToFriendlyName_domainName2(c *C) {
+  c.Check(ToFriendlyName("http://a4word.com/"),Equals,"a4word.com")
 }
 
-func (s *MySuite) Test_toFriendlyName_path(c *C) {
-  c.Check(toFriendlyName("http://a4word.com/a"),Equals,"/a")
+func (s *MySuite) Test_ToFriendlyName_path(c *C) {
+  c.Check(ToFriendlyName("http://a4word.com/a"),Equals,"/a")
 }
 
-func (s *MySuite) Test_toFriendlyName_path2(c *C) {
-  c.Check(toFriendlyName("http://a4word.com/a/b/c.txt"),Equals,"/a/b/c.txt")
+func (s *MySuite) Test_ToFriendlyName_path2(c *C) {
+  c.Check(ToFriendlyName("http://a4word.com/a/b/c.txt"),Equals,"/a/b/c.txt")
+}
+
+//-------
+// ToFriendlyType
+//-------
+
+func (s *MySuite) Test_ToFriendlyType_empty(c *C) {
+  c.Check(ToFriendlyType(""),Equals,"")
+}
+
+func (s *MySuite) Test_ToFriendlyType_lastSlash(c *C) {
+  c.Check(ToFriendlyType("a/b/c"),Equals,"c")
+}
+
+func (s *MySuite) Test_ToFriendlyType_examples(c *C) {
+  c.Check(ToFriendlyType("application/x-javascript"),Equals,"js")
+  c.Check(ToFriendlyType("text/css"),Equals,"css")
+  c.Check(ToFriendlyType("image/png"),Equals,"png")
+  c.Check(ToFriendlyType("application/msword"),Equals,"doc")
+  c.Check(ToFriendlyType("application/x-shockwave-flash"),Equals,"flash")
 }
 
 //------
@@ -107,12 +127,18 @@ func (s *MySuite) Test_toUrl_https_path(c *C) {
 }
 
 //------
-// isWebpage
+// IsWebpage
 //------
 
-func (s *MySuite) Test_isWebpage_html(c *C) {
-  c.Check(isWebpage("text/html"),Equals,true)
-  c.Check(isWebpage("text/garble"),Equals,false)
+func (s *MySuite) Test_IsWebpage_html(c *C) {
+  c.Check(IsWebpage("text/html"),Equals,true)
+  c.Check(IsWebpage("text/garble"),Equals,false)
+}
+
+func (s *MySuite) Test_IsWebpage_htmlWithCharset(c *C) {
+  c.Check(IsWebpage("text/html; charset=utf-8"),Equals,true)
+  c.Check(IsWebpage("charset=utf-8; text/html"),Equals,true)
+  c.Check(IsWebpage("charset=utf-8; text/html garble"),Equals,true)
 }
 
 //------
