@@ -27,3 +27,6 @@ tmp
 weblconsole/webconsole
 weblui/weblui
 .sass-cache
+weblui/static/sitemaps/
+weblconsole/weblconsole
+weblconsole/sitemaps

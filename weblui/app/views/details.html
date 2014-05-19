@@ -15,7 +15,7 @@
                 {{ template "_domain_links" .Domain }}
               </th>
               <th>Type</th>
-              <th>Status Code</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody>
@@ -82,8 +82,10 @@
       </div>
     </div>
 
-    {{template "_output"}}
-
+    <div class="terminal-container">
+      {{template "_output"}}
+    </div>
+    
   {{end}}
 
 

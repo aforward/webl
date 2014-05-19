@@ -133,7 +133,7 @@ func IsWebpage(contentType string) (bool) {
   return contentType == "text/html" || strings.Contains(contentType,"text/html")
 }
 
-func resource_path(token html.Token) (string) {
+func resourcePath(token html.Token) (string) {
   for _,attr := range token.Attr {
     switch attr.Key {
     case "href","src":

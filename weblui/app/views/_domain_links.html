@@ -3,8 +3,8 @@
   <div class="medium btn link-button"><a href="{{.Url}}" title="Click here to go visit {{.Name}}" >View Site ➚</a></div>
   <div class="medium btn link-button"><a href="/details/{{.Name}}" title="Click here to see the sitemap {{.Name}}" >Table ⿳</a></div>
   <div class="medium btn link-button"><a href="/graph/{{.Name}}" title="Click here to see a visualization {{.Name}}" >Graph ⧝</a></div>
-  <div class="medium btn crawl-button"><input class="crawl" type="submit" value="Redo ↺" data-url="{{.Name}}" title="Click here to re-analyze {{.Name}}" /></div>
+  <div class="medium btn link-button"><a href="/static/sitemaps/{{.Name}}.xml" title="Click here to download the sitemap XML {{.Name}}" >XML ≶</a></div>
+  <div class="medium btn crawl-button"><input class="crawl float-left" type="submit" value="Redo ↺" data-url="{{.Name}}" title="Click here to re-analyze {{.Name}}" /><div class="loader white-background"></div></div>
   <div class="medium btn delete-button"><input class="delete" type="submit" value="Del ✖" data-url="{{.Name}}" title="Click here to delete {{.Name}}" /></div>
-  <div class="loader default-background"></div>
 </div>
 {{end}}

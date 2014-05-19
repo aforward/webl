@@ -14,7 +14,7 @@ import (
 // PUBLIC
 //----------------
 
-func Crawl(domainName string) bool {
+func Crawl(domainName string, saveDir string) bool {
 
   if (domainName == "") {
     WARN.Println("No domain provided, nothing to crawl.")
@@ -39,7 +39,7 @@ func Crawl(domainName string) bool {
   TRACE.Println("Done waiting.")
 
   savedResource := LoadDomain(domainName,true)
-  WriteSitemap(savedResource, fmt.Sprintf("./tmp/%s.sitemap.xml", domainName))
+  WriteSitemap(savedResource, fmt.Sprintf("%s/%s.xml", saveDir,domainName))
   INFO.Println(fmt.Sprintf("Done crawing: %s", domainName))
   return true
 }
@@ -115,7 +115,7 @@ func analyzeResource(domainName string, currentUrl string, resp *http.Response, 
     token := tokenizer.Token()
     switch token_type {
     case html.StartTagToken, html.SelfClosingTagToken: // <tag>
-      path := resource_path(token)
+      path := resourcePath(token)
       if path != "" {
         wg.Add(1)
         nextUrl := toUrl(domainName,path)

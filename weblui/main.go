@@ -115,12 +115,12 @@ func listDomains(w http.ResponseWriter, r *http.Request) {
 
 func showSitemap(w http.ResponseWriter, r *http.Request) {
   domain := webl.LoadDomain(v("url",r),false)
-  urlSet := webl.GenerateSitemap(&domain,false)
+  urlSet := webl.GenerateSitemap(domain,false)
 
   page := DetailsPage{ 
     HtmlHeader: &HtmlHeader{ Title: fmt.Sprintf("%s sitemap (using webl)",domain.Name) }, 
     HtmlFooter: &HtmlFooter{ AppHost: host }, 
-    Domain: &domain,
+    Domain: domain,
     Sitemap: urlSet,
   }
   webViews["details"].Execute(w, page)
@@ -128,12 +128,12 @@ func showSitemap(w http.ResponseWriter, r *http.Request) {
 
 func showGraph(w http.ResponseWriter, r *http.Request) {
   domain := webl.LoadDomain(v("url",r),false)
-  graph := webl.CreateGraph(&domain)
+  graph := webl.CreateGraph(domain)
 
   page := GraphPage{ 
     HtmlHeader: &HtmlHeader{ Title: fmt.Sprintf("%s sitemap (using webl)",domain.Name) }, 
     HtmlFooter: &HtmlFooter{ AppHost: host }, 
-    Domain: &domain,
+    Domain: domain,
     Graph: &graph,
   }
   webViews["graph"].Execute(w, page)
@@ -171,7 +171,7 @@ func doCrawl(ws *websocket.Conn) {
   webl.InitLogging(*isQuiet, *isVerbose, *isTimestamped, ws)
   var url string
   websocket.Message.Receive(ws, &url)
-  isOk := webl.Crawl(url)
+  isOk := webl.Crawl(url,"./static/sitemaps")
 
   if isOk {
     websocket.Message.Send(ws, "exit")
@@ -192,13 +192,13 @@ var (
 )
 
 func main() {
-  isVerbose     = flag.Bool("verbose",          false,   "Turn on as musch debugging information as possible")
-  isQuiet       = flag.Bool("quiet",            false,   "Turn off all but the most important logging")
-  isTimestamped = flag.Bool("timestamped",      false,   "Should outputs be timestamped")
-  isVersion     := flag.Bool("version",          false,   "Output the version of this app")
-  redisServer   := flag.String("redis",          ":6379", "Specify the redis server (default 127.0.0.1:6379)")
-  redisPassword := flag.String("redis-password", "",      "Specify the redis server password")
-  port          := flag.String("port",           "4005",  "Specify the web server port (default 4005)")
+  isVerbose     = flag.Bool("verbose",          false,                "Turn on as musch debugging information as possible")
+  isQuiet       = flag.Bool("quiet",            false,                "Turn off all but the most important logging")
+  isTimestamped = flag.Bool("timestamped",      false,                "Should outputs be timestamped")
+  isVersion     := flag.Bool("version",          false,               "Output the version of this app")
+  redisServer   := flag.String("redis",          ":6379",             "Specify the redis server (default 127.0.0.1:6379)")
+  redisPassword := flag.String("redis-password", "",                  "Specify the redis server password")
+  port          := flag.String("port",           "4005",              "Specify the web server port (default 4005)")
 
   flag.Parse()
   webl.InitLogging(*isQuiet, *isVerbose, *isTimestamped, nil)

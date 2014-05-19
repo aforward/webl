@@ -32,7 +32,7 @@
             </div>
             <div class="button">
               <div class="medium go-button btn"><input class="go" type="submit" value="Go" /></div>
-              <div class="loader default-background"></div>
+              <div class="loader white-background"></div>
             </div>
           </td>
         </tr>
@@ -42,7 +42,9 @@
     </div>
   </div>
 
-  {{template "_output"}}  
+  <div class="terminal-container">
+    {{template "_output"}}  
+  </div>
 
   {{template "_html_footer" .HtmlFooter}}
 </body> 

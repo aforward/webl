@@ -48,12 +48,15 @@ App.crawl = function(me,url)
         App.enable(me,".crawl");
         App.done_waiting(me);
         if (data == "exit") {
-          var sitemap_url = "http://" + App.host + "/details/" + url;
+          var details_url = "http://" + App.host + "/details/" + url;
           var graph_url = "http://" + App.host + "/graph/" + url;
           var list_url = "http://" + App.host + "/list";
+          var sitemap_url = "http://" + App.host + "/static/sitemaps/" + url + ".xml";
+
           $(".output").append("View all analyzed domains at at <a href=\""+ list_url +"\">" + list_url  + "</a><br />");
-          $(".output").append("View sitemap at <a href=\""+ sitemap_url +"\">" + sitemap_url  + "</a><br />");
+          $(".output").append("View details at <a href=\""+ details_url +"\">" + details_url  + "</a><br />");
           $(".output").append("View graph at <a href=\""+ graph_url +"\">" + graph_url  + "</a><br />");
+          $(".output").append("Download sitemap at <a href=\""+ sitemap_url +"\">" + sitemap_url  + "</a><br />");
         }
         socket.close();
       } else {
@@ -77,8 +80,7 @@ App.go = function(me,url)
   $(".output").html("");
 
   App.waiting(me);
-  App.disable(me,".url");
-  App.disable(me,".crawl");
+  App.disable(me,".go");
 
   $.ajax({ type: "GET", url: "/exists/" + url, data: {} }).done(function( answer ) {
     if (answer == "true") {
@@ -86,6 +88,7 @@ App.go = function(me,url)
       window.location.assign("/details/" + url)
     } else {
       App.crawl(me,url);
+      App.enable(me,".go");
     }
   });  
 }

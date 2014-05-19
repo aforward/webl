@@ -6,13 +6,14 @@ import (
 )
 
 func main() {
-  isVerbose     := flag.Bool("verbose",          false,   "Turn on as musch debugging information as possible")
-  isQuiet       := flag.Bool("quiet",            false,   "Turn off all but the most important logging")
-  isTimestamped := flag.Bool("timestamped",      false,   "Should outputs be timestamped")
-  isVersion     := flag.Bool("version",          false,   "Output the version of this app")
-  startingUrl   := flag.String("url",            "",      "Specify which URL to crawl (e.g. a4word.com)")
-  redisServer   := flag.String("redis",          ":6379", "Specify the redis server (e.g. 127.0.0.1:6379)")
-  redisPassword := flag.String("redis-password", "",      "Specify the redis server password")
+  isVerbose     := flag.Bool("verbose",          false,         "Turn on as musch debugging information as possible")
+  isQuiet       := flag.Bool("quiet",            false,         "Turn off all but the most important logging")
+  isTimestamped := flag.Bool("timestamped",      false,         "Should outputs be timestamped")
+  isVersion     := flag.Bool("version",          false,         "Output the version of this app")
+  startingUrl   := flag.String("url",            "",            "Specify which URL to crawl (e.g. a4word.com)")
+  redisServer   := flag.String("redis",          ":6379",       "Specify the redis server (e.g. 127.0.0.1:6379)")
+  redisPassword := flag.String("redis-password", "",            "Specify the redis server password")
+  saveDir       := flag.String("dir",            "./sitemaps",  "Specify where to save the sitemap xml file")
 
   flag.Parse()
 
@@ -28,5 +29,5 @@ func main() {
   }
 
   webl.Pool = webl.NewPool(*redisServer, *redisPassword)
-  webl.Crawl(*startingUrl)
+  webl.Crawl(*startingUrl, *saveDir)
 }

@@ -142,30 +142,30 @@ func (s *MySuite) Test_IsWebpage_htmlWithCharset(c *C) {
 }
 
 //------
-// resource_path
+// resourcePath
 //------
 
-func (s *MySuite) Test_should_resource_path_empty(c *C) {
-  c.Check(resource_path(html.Token{}),Equals,"")
+func (s *MySuite) Test_should_resourcePath_empty(c *C) {
+  c.Check(resourcePath(html.Token{}),Equals,"")
 }
 
 
-func (s *MySuite) Test_should_resource_path_href(c *C) {
+func (s *MySuite) Test_should_resourcePath_href(c *C) {
   t := html.Token{}
   t.Attr = append(t.Attr,html.Attribute{"", "href", "/x"})
-  c.Check(resource_path(t),Equals,"/x")
+  c.Check(resourcePath(t),Equals,"/x")
 }
 
-func (s *MySuite) Test_should_resource_path_src(c *C) {
+func (s *MySuite) Test_should_resourcePath_src(c *C) {
   t := html.Token{}
   t.Attr = append(t.Attr,html.Attribute{"", "src", "/y"})
-  c.Check(resource_path(t),Equals,"/y")
+  c.Check(resourcePath(t),Equals,"/y")
 }
 
-func (s *MySuite) Test_should_resource_path_garble(c *C) {
+func (s *MySuite) Test_should_resourcePath_garble(c *C) {
   t := html.Token{}
   t.Attr = append(t.Attr,html.Attribute{"", "garble", "/y"})
-  c.Check(resource_path(t),Equals,"")
+  c.Check(resourcePath(t),Equals,"")
 }
 
 

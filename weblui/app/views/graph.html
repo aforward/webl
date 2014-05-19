@@ -2,7 +2,6 @@
 
 <body class="detailspage"> 
 
-
   {{if .Domain.LastAnalyzed}}
 
     {{ template "_header_links" }}
@@ -46,8 +45,10 @@
       </div>
     </div>
 
-    {{template "_output"}}
-
+    <div class="terminal-container">
+      {{template "_output"}}
+    </div>
+    
   {{end}}
 
 
