@@ -46,9 +46,14 @@ TODO
 ------------
 
 * Strengthen domain format inputs (e.g. http:// and trailing /)
+* Strip links
 * Resolve "//" as the same protocol as calling page
 * Enable viewing of sitemap.xml
 * Display graph link
 * Read robots.txt and ensure following the directives
 * Review code, extract additional tests
 * Create docker deployment
+
+
+
+

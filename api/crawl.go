@@ -10,6 +10,10 @@ import (
   "io/ioutil"
 )
 
+//----------------
+// PUBLIC
+//----------------
+
 func Crawl(domainName string) bool {
 
   if (domainName == "") {
@@ -28,17 +32,21 @@ func Crawl(domainName string) bool {
   url := toUrl(domainName,"")
   name := ToFriendlyName(url)
 
-  addDomain(&Resource{ Name: name, Url: url, LastAnalyzed: lastAnalyzed })
+  AddDomain(&Resource{ Name: name, Url: url, LastAnalyzed: lastAnalyzed })
   go fetchResource(name, url, alreadyProcessed, httpLimitChannel, &wg)
   TRACE.Println("Wait...")
   wg.Wait();
   TRACE.Println("Done waiting.")
 
   savedResource := LoadDomain(domainName,true)
-  WriteSitemap(&savedResource, fmt.Sprintf("./tmp/%s.sitemap.xml", domainName))
+  WriteSitemap(savedResource, fmt.Sprintf("./tmp/%s.sitemap.xml", domainName))
   INFO.Println(fmt.Sprintf("Done crawing: %s", domainName))
   return true
 }
+
+//----------------
+// HELPERS
+//----------------
 
 func fetchResource(domainName string, currentUrl string, alreadyProcessed *set.Set, httpLimitChannel chan int, wg *sync.WaitGroup) {
   defer wg.Done()

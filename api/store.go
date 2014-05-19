@@ -10,6 +10,10 @@ var (
   Pool *redis.Pool
 )
 
+//----------------
+// PUBLIC
+//----------------
+
 func NewPool(server, password string) *redis.Pool {
   return &redis.Pool{
     MaxIdle: 3,
@@ -34,11 +38,7 @@ func NewPool(server, password string) *redis.Pool {
   }
 }
 
-func friendlyNow() string {
-  return time.Now().Format("2006-01-02 15:04:05")  
-}
-
-func addDomain(domain *Resource) {
+func AddDomain(domain *Resource) {
   conn := Pool.Get()
   defer conn.Close()
 
@@ -73,12 +73,25 @@ func ListDomains() (domains []*Resource) {
     FailOnError(err)
     domains = make([]*Resource,len(members))
     for i, domain := range members {
-      resource := LoadDomain(domain,true)
-      domains[i] = &resource
+      domains[i] = LoadDomain(domain,true)
     }
   }
   return
 }
+
+func LoadDomain(domain string, isBasic bool) *Resource {
+  resource := LoadResource(toUrl(domain,""), isBasic)
+  resource.Name = domain
+  return resource
+}
+
+func LoadResource(domain string, isBasic bool) *Resource {
+  return findResource(toUrl(domain,""), true, isBasic, make(map[string]*Resource))
+}
+
+//----------------
+// HELPERS
+//----------------
 
 func saveResource(resource *Resource) {
   conn := Pool.Get()
@@ -112,26 +125,7 @@ func deleteResource(url string) {
   deleteKeys(conn, fmt.Sprintf("resources:::%s*",url))
 }
 
-func deleteKeys(conn redis.Conn, keyFilter string) {
-  keys, err := redis.Strings(conn.Do("KEYS", keyFilter))
-  FailOnError(err)
-  for _, k := range keys {
-    conn.Do("DEL",k)
-  }
-}
-
-func LoadDomain(domain string, isBasic bool) Resource {
-  resource := LoadResource(toUrl(domain,""), isBasic)
-  resource.Name = domain
-  return resource
-}
-
-func LoadResource(domain string, isBasic bool) Resource {
-  allResources := make(map[string]Resource)
-  return findResource(toUrl(domain,""), true, isBasic, allResources)
-}
-
-func findResource(url string, isRoot bool, isBasic bool, allResources map[string]Resource) (resource Resource) {
+func findResource(url string, isRoot bool, isBasic bool, allResources map[string]*Resource) (resource *Resource) {
   conn := Pool.Get()
   defer conn.Close()
 
@@ -152,17 +146,16 @@ func findResource(url string, isRoot bool, isBasic bool, allResources map[string
     err = redis.ScanStruct(values, &r)
     FailOnError(err)
 
-    resource = Resource{ Name: r.Name, LastAnalyzed: r.LastAnalyzed, Url: r.Url, Status: r.Status, StatusCode: r.StatusCode, Type: r.Type }
+    resource = &Resource{ Name: r.Name, LastAnalyzed: r.LastAnalyzed, Url: r.Url, Status: r.Status, StatusCode: r.StatusCode, Type: r.Type }
     allResources[r.Url] = resource
     if !isRoot && isBasic {
       return
     }
 
-    linksKey := fmt.Sprintf("edges:::%s",r.Url)
-    members, err :=  redis.Strings(conn.Do("SMEMBERS",linksKey))
-    resource.Links = make([]Resource,0)
-    resource.Assets = make([]Resource,0)
-    var possibleLink Resource
+    members, err :=  redis.Strings(conn.Do("SMEMBERS",fmt.Sprintf("edges:::%s",r.Url)))
+    resource.Links = make([]*Resource,0)
+    resource.Assets = make([]*Resource,0)
+    var possibleLink *Resource
     for _, link := range members {
       if linkResource,ok := allResources[link]; ok {
         TRACE.Println(fmt.Sprintf("Reused link between %s -> %s", r.Url, link))
@@ -184,10 +177,21 @@ func findResource(url string, isRoot bool, isBasic bool, allResources map[string
 
     }
   } else {
-    resource = Resource{ Name: ToFriendlyName(url), Url: url, Status: "missing" }
+    resource = &Resource{ Name: ToFriendlyName(url), Url: url, Status: "missing" }
   }
   return
 }
 
+func deleteKeys(conn redis.Conn, keyFilter string) {
+  keys, err := redis.Strings(conn.Do("KEYS", keyFilter))
+  FailOnError(err)
+  for _, k := range keys {
+    conn.Do("DEL",k)
+  }
+}
+
+func friendlyNow() string {
+  return time.Now().Format("2006-01-02 15:04:05")  
+}
 
 

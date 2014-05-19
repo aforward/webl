@@ -52,13 +52,13 @@ func (s *MySuite) Test_deleteResource(c *C) {
   c.Check(sameR.Type,Equals,"")  
 }
 
-func (s *MySuite) Test_addDomain(c *C) {
+func (s *MySuite) Test_AddDomain(c *C) {
   Pool = NewPool(":6379","")
   DeleteAllDomains()
   c.Check(len(ListDomains()),Equals,0)
 
   r := Resource{ Name: "a4word.com", Url: "http://a4word.com" }
-  addDomain(&r)
+  AddDomain(&r)
   all := ListDomains()
   c.Check(len(all),Equals,1)
   c.Check(all[0].Name,Equals,"a4word.com")
@@ -70,7 +70,7 @@ func (s *MySuite) Test_RemoveDomain(c *C) {
   c.Check(len(ListDomains()),Equals,0)
 
   r := Resource{ Name: "a4word.com", Url: "http://a4word.com" }
-  addDomain(&r)
+  AddDomain(&r)
   all := ListDomains()
   c.Check(len(all),Equals,1)
   

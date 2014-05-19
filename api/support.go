@@ -16,8 +16,8 @@ type Resource struct {
   StatusCode int
   LastModified string
   Type string
-  Links []Resource
-  Assets []Resource
+  Links []*Resource
+  Assets []*Resource
 }
 
 func (resource *Resource) FriendlyName() string {
@@ -173,7 +173,7 @@ func flattenEdges(edges []Edge, node *Resource, alreadyProcessed *set.Set) []Edg
       
       if !alreadyProcessed.Has(link.Url) {
         alreadyProcessed.Add(link.Url)
-        edges = flattenEdges(edges,&link,alreadyProcessed)
+        edges = flattenEdges(edges,link,alreadyProcessed)
       }
     }
   } 

@@ -9,6 +9,10 @@ import (
   "gopkg.in/fatih/set.v0"
 )
 
+//----------------
+// STRUCTURES
+//----------------
+
 type Sitemap struct {
   XMLName        xml.Name     `xml:"urlset"`
   Namespace      string       `xml:"xmlns,attr"`
@@ -20,7 +24,7 @@ type Sitemap struct {
 type UrlItem struct {
   XMLName    xml.Name `xml:"url"`
   Loc        string   `xml:"loc"`
-  StatusCode int
+  StatusCode int      `xml:"-"`
   LastMod    string   `xml:"lastmod,omitempty"`
   Priority   float32  `xml:"priority,omitempty"`
   ChangeFreq string   `xml:"changefreq,omitempty"`
@@ -30,21 +34,50 @@ func (item *UrlItem) FriendlyName() string {
   return ToFriendlyName(item.Loc)
 }
 
-func (item *UrlItem) Assets() []Resource {
+func (item *UrlItem) Assets() []*Resource {
   resource := LoadResource(item.Loc,true)
-  return resource.Assets
+  if resource.Assets == nil {
+    return make([]*Resource,0)
+  } else {
+    return resource.Assets  
+  }
 }
 
-func (item *UrlItem) Links() []Resource {
+func (item *UrlItem) Links() []*Resource {
   resource := LoadResource(item.Loc,true)
-  return resource.Links
+  if resource.Links == nil {
+    return make([]*Resource,0)
+  } else {
+    return resource.Links  
+  }
 }
 
+//----------------
+// PUBLIC
+//----------------
 
-func WriteSitemap(domain *Resource, filename string) (urlSet *Sitemap) {
-  urlSet = GenerateSitemap(domain,true)
+func InitSitemap() Sitemap {
+  return Sitemap{ 
+      Namespace: "http://www.sitemaps.org/schemas/sitemap/0.9",
+      Schema: "http://www.w3.org/2001/XMLSchema-instance",
+      SchemaLocation: "http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd",
+    }
+}
+
+func GenerateSitemap(domain *Resource, onlyValidUrls bool) *Sitemap {
+  TRACE.Println(fmt.Sprintf("Generating sitemap for: %s", domain.Name))
+  sitemap := InitSitemap()
+  alreadyProcessed := set.New()
+  alreadyProcessed.Add(domain.Url)
+  sitemap.Urls = []UrlItem{UrlItem{Loc: domain.Url, StatusCode: domain.StatusCode, LastMod: domain.LastModified }}
+  appendSitemapChildren(&sitemap,domain,onlyValidUrls,alreadyProcessed)
+  return &sitemap
+}
+
+func WriteSitemap(domain *Resource, filename string) (sitemap *Sitemap) {
+  sitemap = GenerateSitemap(domain,true)
   TRACE.Println(fmt.Sprintf("Saving sitemap to: %s", filename))
-  urlSetAsXml, err := xml.MarshalIndent(urlSet, "", "  ")
+  urlSetAsXml, err := xml.MarshalIndent(sitemap, "", "  ")
   FailOnError(err)
   os.MkdirAll(path.Dir(filename), 0755)
   err = ioutil.WriteFile(filename, urlSetAsXml, 0744)
@@ -52,15 +85,9 @@ func WriteSitemap(domain *Resource, filename string) (urlSet *Sitemap) {
   return
 }
 
-func GenerateSitemap(domain *Resource, onlyValidUrls bool) (urlSet *Sitemap) {
-  TRACE.Println(fmt.Sprintf("Generating sitemap for: %s", domain.Name))
-  urlSet = initSitemap()
-  alreadyProcessed := set.New()
-  alreadyProcessed.Add(domain.Url)
-  urlSet.Urls = []UrlItem{UrlItem{Loc: domain.Url, StatusCode: domain.StatusCode, LastMod: domain.LastModified }}
-  appendSitemapChildren(urlSet,domain,onlyValidUrls,alreadyProcessed)
-  return
-}
+//----------------
+// HELPERS
+//----------------
 
 func appendSitemapChildren(urlSet *Sitemap, resource *Resource, onlyValidUrls bool, alreadyProcessed *set.Set) {
   for _,link := range resource.Links {
@@ -79,15 +106,7 @@ func appendSitemapChildren(urlSet *Sitemap, resource *Resource, onlyValidUrls bo
     } else {
       TRACE.Println(fmt.Sprintf("Adding to sitemap (%s %s): %s", link.Type, link.Status, link.Url))
       urlSet.Urls = append(urlSet.Urls, UrlItem{Loc: link.Url, StatusCode: link.StatusCode, LastMod: link.LastModified})
-      appendSitemapChildren(urlSet,&link,onlyValidUrls,alreadyProcessed)
+      appendSitemapChildren(urlSet,link,onlyValidUrls,alreadyProcessed)
     }
   }
-}
-
-func initSitemap() *Sitemap {
-  return &Sitemap{ 
-      Namespace: "http://www.sitemaps.org/schemas/sitemap/0.9",
-      Schema: "http://www.w3.org/2001/XMLSchema-instance",
-      SchemaLocation: "http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd",
-    }
 }
