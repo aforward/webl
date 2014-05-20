@@ -6,7 +6,13 @@ import (
   "net/url"
   "code.google.com/p/go.net/html"
   "gopkg.in/fatih/set.v0"
+  "github.com/temoto/robotstxt-go"
+  "net/http"
 )
+
+//----------------
+// DATA STRUCTURES
+//----------------
 
 type Resource struct {
   Name string
@@ -40,6 +46,10 @@ type Edge struct {
   FromName string
   ToName string
 }
+
+//----------------
+// PUBLIC
+//----------------
 
 func Version() string {
   return "0.0.1"
@@ -83,23 +93,93 @@ func ToFriendlyStatus(status string, code int) string {
 }
 
 func toDomain(provided string) (domain string) {
-  provided_url, _ := url.Parse(provided)
-  if provided_url.Host == "" {
+  providedUrl, _ := url.Parse(provided)
+  if providedUrl.Host == "" {
     domain = provided
   } else {
-    domain = strings.Split(provided_url.Host, ":")[0]  
+    domain = strings.Split(providedUrl.Host, ":")[0]  
   }
   return
 }
 
-func toUrl(provided string, path string) (processed_url string) {
+func IsWebpage(contentType string) (bool) {
+  return contentType == "text/html" || strings.Contains(contentType,"text/html")
+}
+
+func CreateGraph(domain *Resource) Graph {
+  edges := make([]Edge,10)
+  edges = flattenEdges(edges,domain,set.New())
+  return Graph{ Edges: edges }
+}
+
+//----------------
+// HEL-]PERS
+//----------------
+
+func canRobotsAccess(input string, allRobots map[string]*robotstxt.RobotsData) (canAccess bool) {
+  canAccess = true
+  robotsUrl := toRobotsUrl(input)
+  inputPath := toPath(input)
+
+  if robot,ok := allRobots[robotsUrl]; ok {
+    if robot == nil {
+      return
+    }
+    canAccess = robot.TestAgent(inputPath, "WeblBot")
+  } else {
+    allRobots[robotsUrl] = nil
+    TRACE.Println(fmt.Sprintf("Loading %s",robotsUrl))
+    resp, err := http.Get(robotsUrl)
+    if resp != nil && resp.Body != nil {
+      defer resp.Body.Close()  
+    }
+    if err != nil {
+      return
+    }
+    if resp.StatusCode != 200 {
+      TRACE.Println(fmt.Sprintf("Unable to access %s, assuming full access.",robotsUrl)) 
+      return
+    } else {
+      robot, err := robotstxt.FromResponse(resp)
+      if err != nil {
+        return
+      }
+      allRobots[robotsUrl] = robot
+      canAccess = robot.TestAgent(inputPath, "WeblBot")
+      TRACE.Println(fmt.Sprintf("Access to %s via %s (ok? %t)",inputPath,robotsUrl,canAccess))  
+    }
+  }
+  return
+}
+
+func toRobotsUrl(provided string) (robotsUrl string) {
+  providedUrl, _ := url.Parse(provided)
+  robotsUrl = fmt.Sprintf("%s://%s/robots.txt",providedUrl.Scheme,providedUrl.Host)
+  return
+}
+
+func toPath(input string) (path string) {
+  inputUrl, _ := url.Parse(input)
+  path = inputUrl.Path
+  if path == "" {
+    path = "/"  
+  }
+  return
+}
+
+func toUrl(provided string, path string) (processedUrl string) {
+
+  if provided == path {
+    path = ""
+  }
+
   path_url, _ := url.Parse(path)
-  provided_url, _ := url.Parse(provided)
+  providedUrl, _ := url.Parse(provided)
 
   if path_url.Scheme != "" {
-    processed_url = fmt.Sprintf("%s://%s",path_url.Scheme,path_url.Host)
+    processedUrl = fmt.Sprintf("%s://%s",path_url.Scheme,path_url.Host)
     if path_url.Path != "/" {
-      processed_url = fmt.Sprintf("%s%s",processed_url,path_url.Path)
+      processedUrl = fmt.Sprintf("%s%s",processedUrl,path_url.Path)
     }
     return
   }
@@ -108,45 +188,41 @@ func toUrl(provided string, path string) (processed_url string) {
     path = ""
   }
 
-  processed_url = provided
-  if provided_url.Scheme == "" {
-    processed_url = fmt.Sprintf("http://%s", processed_url)
+  processedUrl = provided
+  if providedUrl.Scheme == "" {
+    processedUrl = fmt.Sprintf("http://%s", processedUrl)
   }
 
   is_missing_protocol := strings.HasPrefix(path,"//")
   if is_missing_protocol {
-    processed_url = fmt.Sprintf("http:%s", path)
+    processedUrl = fmt.Sprintf("http:%s", path)
     path = ""
   }
 
   is_absolute_path := strings.HasPrefix(path,"/")
 
-  if path == "" && strings.HasSuffix(processed_url,"/") {
-    processed_url = processed_url[0:len(processed_url)-1]
+  if path == "" && strings.HasSuffix(processedUrl,"/") {
+    processedUrl = processedUrl[0:len(processedUrl)-1]
   }
 
 
-  if !strings.HasSuffix(processed_url,"/") && path != "" && !is_absolute_path {
-    processed_url = fmt.Sprintf("%s/", processed_url)
+  if !strings.HasSuffix(processedUrl,"/") && path != "" && !is_absolute_path {
+    processedUrl = fmt.Sprintf("%s/", processedUrl)
   } else if is_absolute_path {
-    u, _ := url.Parse(processed_url)
-    processed_url = processed_url[0:len(processed_url)-len(u.Path)]
+    u, _ := url.Parse(processedUrl)
+    processedUrl = processedUrl[0:len(processedUrl)-len(u.Path)]
   }
 
-  processed_url = fmt.Sprintf("%s%s", processed_url, path)
+  processedUrl = fmt.Sprintf("%s%s", processedUrl, path)
   return 
 }
 
 func shouldProcessUrl(provided string, current string) (bool) {
-  provided_url, _ := url.Parse(toUrl(provided,""))
+  providedUrl, _ := url.Parse(toUrl(provided,""))
   currentUrl, _ := url.Parse(toUrl(current,""))
-  provided_domain := strings.Split(provided_url.Host, ":")[0]
+  provided_domain := strings.Split(providedUrl.Host, ":")[0]
   current_domain := strings.Split(currentUrl.Host, ":")[0]
   return provided_domain == current_domain
-}
-
-func IsWebpage(contentType string) (bool) {
-  return contentType == "text/html" || strings.Contains(contentType,"text/html")
 }
 
 func resourcePath(token html.Token) (string) {
@@ -165,12 +241,6 @@ func initCapacity(maxOutstanding int) (sem chan int) {
     sem <- 1
   }
   return
-}
-
-func CreateGraph(domain *Resource) Graph {
-  edges := make([]Edge,10)
-  edges = flattenEdges(edges,domain,set.New())
-  return Graph{ Edges: edges }
 }
 
 func flattenEdges(edges []Edge, node *Resource, alreadyProcessed *set.Set) []Edge {

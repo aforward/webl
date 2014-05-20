@@ -45,10 +45,14 @@ You can now crawl websites through the UI
 TODO
 ------------
 
-* Read robots.txt and ensure following the directives
 * Review code, extract additional tests
 * Create docker deployment
-
+* Adding the ability to manage multiple crawls over a domain and provide a diff of the results.
+* Adding security to prevent abuse from crawling too often.
+* Improve visualization based on how best to use the data (e.g. broken links, unused assets, etc). This will most likely involve an improved data store (like Postgres) to allow for reaching searching.
+* Improved sitemap.xml generation to grab other fields like priority, last modified, etc.
+* Improved resource meta-data like title, and keywords, as well as taking thumbnails of the webpage.
+* Improved link identification by analyzing JS and CSS for urls.
 
 
 

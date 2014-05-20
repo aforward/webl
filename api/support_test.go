@@ -89,15 +89,56 @@ func (s *MySuite) Test_toDomain_stripUrlComponents(c *C) {
 }
 
 //------
-// toUrl
+// toRobotsUrl
 //------
 
+func (s *MySuite) Test_toRobotsUrl_rootDomain(c *C) {
+  c.Check(toRobotsUrl("http://a4word.com"),Equals,"http://a4word.com/robots.txt")
+  c.Check(toRobotsUrl("http://a4word.com/"),Equals,"http://a4word.com/robots.txt")
+  c.Check(toRobotsUrl("http://a4word.com/#"),Equals,"http://a4word.com/robots.txt")
+  c.Check(toRobotsUrl("http://a4word.com/?"),Equals,"http://a4word.com/robots.txt")
+}
+
+func (s *MySuite) Test_toRobotsUrl_hasPaths(c *C) {
+  c.Check(toRobotsUrl("http://a4word.com/a/b/c.php"),Equals,"http://a4word.com/robots.txt")
+  c.Check(toRobotsUrl("http://a4word.com/x.html"),Equals,"http://a4word.com/robots.txt")
+}
+
+func (s *MySuite) Test_toRobotsUrl_subDomains(c *C) {
+  c.Check(toRobotsUrl("http://sub.a4word.com/a/b/c.php"),Equals,"http://sub.a4word.com/robots.txt")
+  c.Check(toRobotsUrl("http://sub.a4word.com/x.html"),Equals,"http://sub.a4word.com/robots.txt")
+  c.Check(toRobotsUrl("http://sub.a4word.com"),Equals,"http://sub.a4word.com/robots.txt")
+}
+
+//------
+// toPath
+//------
+
+func (s *MySuite) Test_toPath_root(c *C) {
+  c.Check(toPath("http://a4word.com"),Equals,"/")
+  c.Check(toPath("http://a4word.com/"),Equals,"/")
+  c.Check(toPath("http://a4word.com/#"),Equals,"/")
+  c.Check(toPath("http://a4word.com/?"),Equals,"/")
+}
+
+func (s *MySuite) Test_toPath_grabThePath(c *C) {
+  c.Check(toPath("http://a4word.com/a/b/c"),Equals,"/a/b/c")
+  c.Check(toPath("http://a4word.com/a"),Equals,"/a")
+  c.Check(toPath("http://a4word.com/a?asdf"),Equals,"/a")
+}
+
+//------
+// toUrl
+//------
 
 func (s *MySuite) Test_toUrl_rootDomain(c *C) {
   c.Check(toUrl("http://a4word.com",""),Equals,"http://a4word.com")
   c.Check(toUrl("http://a4word.com","/"),Equals,"http://a4word.com")
   c.Check(toUrl("http://a4word.com","#"),Equals,"http://a4word.com")
   c.Check(toUrl("http://a4word.com","?"),Equals,"http://a4word.com")
+
+  c.Check(toUrl("a4word.com","a4word.com"),Equals,"http://a4word.com")
+  c.Check(toUrl("a4word.com","http://a4word.com"),Equals,"http://a4word.com")
 }
 
 func (s *MySuite) Test_doubleSlash(c *C) {
