@@ -113,6 +113,12 @@ func toUrl(provided string, path string) (processed_url string) {
     processed_url = fmt.Sprintf("http://%s", processed_url)
   }
 
+  is_missing_protocol := strings.HasPrefix(path,"//")
+  if is_missing_protocol {
+    processed_url = fmt.Sprintf("http:%s", path)
+    path = ""
+  }
+
   is_absolute_path := strings.HasPrefix(path,"/")
 
   if path == "" && strings.HasSuffix(processed_url,"/") {
@@ -147,7 +153,7 @@ func resourcePath(token html.Token) (string) {
   for _,attr := range token.Attr {
     switch attr.Key {
     case "href","src":
-      return attr.Val
+      return strings.TrimSpace(attr.Val)
     }
   }
   return ""

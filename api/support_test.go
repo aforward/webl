@@ -92,11 +92,16 @@ func (s *MySuite) Test_toDomain_stripUrlComponents(c *C) {
 // toUrl
 //------
 
+
 func (s *MySuite) Test_toUrl_rootDomain(c *C) {
   c.Check(toUrl("http://a4word.com",""),Equals,"http://a4word.com")
   c.Check(toUrl("http://a4word.com","/"),Equals,"http://a4word.com")
   c.Check(toUrl("http://a4word.com","#"),Equals,"http://a4word.com")
   c.Check(toUrl("http://a4word.com","?"),Equals,"http://a4word.com")
+}
+
+func (s *MySuite) Test_doubleSlash(c *C) {
+  c.Check(toUrl("a4word.com","//twitter.com"),Equals,"http://twitter.com")
 }
 
 func (s *MySuite) Test_toUrl_drop_slash(c *C) {
@@ -174,6 +179,11 @@ func (s *MySuite) Test_should_resourcePath_empty(c *C) {
   c.Check(resourcePath(html.Token{}),Equals,"")
 }
 
+func (s *MySuite) Test_should_resourcePath_stripResult(c *C) {
+  t := html.Token{}
+  t.Attr = append(t.Attr,html.Attribute{"", "href", " /x   "})
+  c.Check(resourcePath(t),Equals,"/x")
+}
 
 func (s *MySuite) Test_should_resourcePath_href(c *C) {
   t := html.Token{}
