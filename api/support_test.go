@@ -63,6 +63,31 @@ func (s *MySuite) Test_ToFriendlyType_examples(c *C) {
   c.Check(ToFriendlyType("application/x-shockwave-flash"),Equals,"flash")
 }
 
+//-----
+// toDomain
+//-----
+
+func (s *MySuite) Test_toDomain_empty(c *C) {
+  c.Check(toDomain(""),Equals,"")
+}
+
+func (s *MySuite) Test_toDomain_asIs(c *C) {
+  c.Check(toDomain("a4word.com"),Equals,"a4word.com")
+  c.Check(toDomain("a4word"),Equals,"a4word")
+  c.Check(toDomain("www.a4word.com"),Equals,"www.a4word.com")
+  c.Check(toDomain("sub.a4word.com"),Equals,"sub.a4word.com")
+}
+
+func (s *MySuite) Test_toDomain_stripUrlComponents(c *C) {
+  c.Check(toDomain("http://a4word.com"),Equals,"a4word.com")
+  c.Check(toDomain("https://a4word.com/"),Equals,"a4word.com")
+  c.Check(toDomain("git://a4word.com/"),Equals,"a4word.com")
+
+  c.Check(toDomain("http://sub.a4word.com/"),Equals,"sub.a4word.com")
+  c.Check(toDomain("http://www.a4word.com/"),Equals,"www.a4word.com")
+  c.Check(toDomain("http://www.a4word.com/one/two.php"),Equals,"www.a4word.com")
+}
+
 //------
 // toUrl
 //------

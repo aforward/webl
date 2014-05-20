@@ -45,7 +45,6 @@ You can now crawl websites through the UI
 TODO
 ------------
 
-* Strengthen domain format inputs (e.g. http:// and trailing /)
 * Strip links
 * Resolve "//" as the same protocol as calling page
 * Enable viewing of sitemap.xml

@@ -82,6 +82,16 @@ func ToFriendlyStatus(status string, code int) string {
   return fmt.Sprintf("%d",code)
 }
 
+func toDomain(provided string) (domain string) {
+  provided_url, _ := url.Parse(provided)
+  if provided_url.Host == "" {
+    domain = provided
+  } else {
+    domain = strings.Split(provided_url.Host, ":")[0]  
+  }
+  return
+}
+
 func toUrl(provided string, path string) (processed_url string) {
   path_url, _ := url.Parse(path)
   provided_url, _ := url.Parse(provided)

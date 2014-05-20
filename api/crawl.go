@@ -14,7 +14,9 @@ import (
 // PUBLIC
 //----------------
 
-func Crawl(domainName string, saveDir string) bool {
+func Crawl(input string, saveDir string) bool {
+  domainName := toDomain(input)
+  url := toUrl(domainName,input)
 
   if (domainName == "") {
     WARN.Println("No domain provided, nothing to crawl.")
@@ -29,7 +31,6 @@ func Crawl(domainName string, saveDir string) bool {
   wg.Add(1)
 
   alreadyProcessed := set.New()
-  url := toUrl(domainName,"")
   name := ToFriendlyName(url)
 
   AddDomain(&Resource{ Name: name, Url: url, LastAnalyzed: lastAnalyzed })
