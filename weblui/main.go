@@ -198,7 +198,7 @@ func main() {
   isVersion     := flag.Bool("version",          false,               "Output the version of this app")
   redisServer   := flag.String("redis",          ":6379",             "Specify the redis server (default 127.0.0.1:6379)")
   redisPassword := flag.String("redis-password", "",                  "Specify the redis server password")
-  port          := flag.String("port",           "4005",              "Specify the web server port (default 4005)")
+  port          := flag.String("port",           "4006",              "Specify the web server port (default 4006)")
 
   flag.Parse()
   webl.InitLogging(*isQuiet, *isVerbose, *isTimestamped, nil)
